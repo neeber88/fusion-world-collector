@@ -89,6 +89,19 @@ class ImportTests(unittest.TestCase):
   self.assertEqual(result['FS12-01#BASE']['amount'],0.5)
   self.assertEqual(result['FS12-01#ALT-1']['amount'],65.24)
   self.assertNotIn('FB11-001#ALT-1',result)
+ def test_transformed_leader_name_unique_alt_only(self):
+  catalogue={'sets':[{'id':'FB11','name':'Brightness of Hope'}],'cards':[
+    {'set':'FB11','number':'FB11-073','variant':'ALT','id':'FB11-073#ALT-1','name':'Shallot/Giblet'},
+    {'set':'FB11','number':'FB11-122','variant':'ALT','id':'FB11-122#ALT-1','name':'Shallet'},
+    {'set':'FB11','number':'FB11-122','variant':'ALT','id':'FB11-122#ALT-2','name':'Shallet'}]}
+  products=[{'productId':501,'name':'Shallot/Giblet // Shallet (Alternate Art)','extendedData':[{'name':'Number','value':'FB11-073'}]},
+            {'productId':502,'name':'Transformed Shallet (Super Alternate Art)','extendedData':[{'name':'Number','value':'FB11-122'}]}]
+  prices=[{'productId':501,'marketPrice':14.25},{'productId':502,'marketPrice':110}]
+  def fake(url):return {'results':products if url.endswith('/products') else prices}
+  data=make_feed(catalogue,[{'name':'Brightness of Hope','groupId':1}],fake,0)['prices']
+  self.assertEqual(data['FB11-073#ALT-1']['amount'],14.25)
+  self.assertNotIn('FB11-122#ALT-1',data)
+  self.assertNotIn('FB11-122#ALT-2',data)
  def test_mixed_market_subtypes_ignored(self):
   self.assertIsNone(get_subtype_price([{'marketPrice':1.23},{'marketPrice':2.99}]))
 if __name__=='__main__':unittest.main()
