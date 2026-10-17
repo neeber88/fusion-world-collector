@@ -86,6 +86,7 @@ def printed_name(product,number):
     name=str(product.get('name') or '').strip()
     name=re.split(r'\s+-\s+'+re.escape(number)+r'(?=\s|$)',name,maxsplit=1,flags=re.I)[0]
     name=re.sub(r'\s*\((?:bonus pack |super )?(?:alternate art|alt art|parallel)\)\s*$', '',name,flags=re.I)
+    name=re.sub(r'\s*\(Gold\)\s*$', '',name,flags=re.I)
     return name.strip()
 
 def get_subtype_price(pairs):
@@ -131,6 +132,13 @@ def make_feed(catalog,groups,fetch,wait=0.3):
             elif not num.startswith(sid+'-'):
                 stats['reprints_ignored']+=1;continue
             var=print_type(p)
+            # FS11/FS12 starter bonus illustrations are marketed as '(Gold)'
+            # rather than '(Alternate Art)'. Only within their own starter
+            # group can a lone (Gold) print map to the unique ALT slot.
+            if sid in ('FS11','FS12') and re.search(r'\(Gold\)\s*$',str(p.get('name','')),re.I):
+                other=clean(re.sub(r'\(Gold\)\s*$','',str(p.get('name','')),flags=re.I))
+                if not re.search(r'\b(serial|numbered|manga|silver|championship|winner|prize|event|exclusive|judge|stamped|reprint)\b',other):
+                    var='ALT'
             if var=='SPECIAL':stats['reprints_ignored']+=1;continue
             matches=index.get((sid,canonical_number(num),'ALT' if var=='ALT' else 'NORMAL'),[])
             if not matches:stats['unmatched']+=1;continue
