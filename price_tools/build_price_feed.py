@@ -104,7 +104,7 @@ def make_feed(catalog,groups,fetch,wait=0.3):
     cards=catalog['cards']
     index=defaultdict(list)
     for c in cards:index[(c['set'],canonical_number(c['number']),c['variant'])].append(c)
-    result={};conflicted_ids=set();stats={'groups_checked':0,'products_examined':0,'conflicts':0,'reprints_ignored':0,'no_number':0,'unmatched':0,'no_market_price':0,'ambiguous':0,'sets_checked':[]}
+    result={};conflicted_ids=set();alt_diagnostics=defaultdict(lambda:defaultdict(int));stats={'groups_checked':0,'products_examined':0,'conflicts':0,'reprints_ignored':0,'no_number':0,'unmatched':0,'no_market_price':0,'ambiguous':0,'sets_checked':[]}
     for g in groups:
         sid=group_set(g['name'],sets)
         if not sid:continue
@@ -141,7 +141,10 @@ def make_feed(catalog,groups,fetch,wait=0.3):
                     var='ALT'
             if var=='SPECIAL':stats['reprints_ignored']+=1;continue
             matches=index.get((sid,canonical_number(num),'ALT' if var=='ALT' else 'NORMAL'),[])
-            if not matches:stats['unmatched']+=1;continue
+            if not matches:
+                stats['unmatched']+=1
+                if var=='ALT':alt_diagnostics[sid]['no_catalog_variant']+=1
+                continue
             # Keep name matching strict where product titles carry the printed name.
             pname=printed_name(p,num)
             if sid=='ENERGY':
@@ -152,14 +155,21 @@ def make_feed(catalog,groups,fetch,wait=0.3):
                 if not clean(p.get('name','')).startswith('energy marker '):
                     stats['unmatched']+=1;continue
             elif pname and clean(pname) not in (clean(c['name']) for c in matches):
-                stats['unmatched']+=1;continue
+                stats['unmatched']+=1
+                if var=='ALT':alt_diagnostics[sid]['name_mismatch']+=1
+                continue
             price=get_subtype_price(pmap[p['productId']])
-            if price is None:stats['no_market_price']+=1;continue
+            if price is None:
+                stats['no_market_price']+=1
+                if var=='ALT':alt_diagnostics[sid]['market_price_missing_or_ambiguous']+=1
+                continue
             candidates[(sid,num,var)].append((p,price,matches))
         for key,rows in candidates.items():
             # Exactly one market product and one matching official print.
             if len(rows)!=1 or len(rows[0][2])!=1:
-                stats['ambiguous']+=len(rows);continue
+                stats['ambiguous']+=len(rows)
+                if key[2]=='ALT':alt_diagnostics[key[0]]['printing_ambiguity']+=len(rows)
+                continue
             prod,pr,matching=rows[0]
             c=matching[0]
             if c['id'] in conflicted_ids:
@@ -175,6 +185,7 @@ def make_feed(catalog,groups,fetch,wait=0.3):
         coverage[c['set']]['catalog']+=1
         if c['id'] in result:coverage[c['set']]['priced']+=1
     stats['by_set']={sid:counts for sid,counts in sorted(coverage.items())}
+    stats['alt_diagnostics']={k:dict(v) for k,v in sorted(alt_diagnostics.items())}
     return {'kind':'fusion-world-market-prices','schema_version':1,'updated_at':dt.datetime.now(dt.timezone.utc).date().isoformat(),'source':'TCGplayer Market Price via TCGCSV','currency':'USD','prices':result,'stats':{**stats,'priced_variants':len(result),'catalog_variants':len(cards)}}
 
 def main():
@@ -187,6 +198,7 @@ def main():
     Path(args.output).write_text(json.dumps(feed,ensure_ascii=False,indent=2),encoding='utf8')
     print(f"Matched {feed['stats']['priced_variants']} of {feed['stats']['catalog_variants']} printings in {feed['stats']['groups_checked']} groups")
     print('Set coverage:',json.dumps(feed['stats']['by_set'],sort_keys=True))
+    print('ALT diagnostics:',json.dumps(feed['stats']['alt_diagnostics'],sort_keys=True))
     print('Not priced:',feed['stats']['ambiguous'],'ambiguous product/print matches,',feed['stats']['no_market_price'],'missing/inconsistent market prices')
 
 if __name__=='__main__':main()
