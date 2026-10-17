@@ -35,7 +35,7 @@ class ImportTests(unittest.TestCase):
           {'name':'Brightness of Hope','groupId':3}]
   products={1:[{'productId':21,'name':'Son Goku - FP-001'},
                {'productId':22,'name':'Gotenks - FB11-003 (Alternate Art)'}],
-            2:[{'productId':23,'name':'Energy Marker - E-123'}],
+            2:[{'productId':23,'name':'Energy Marker (E-123)'}],
             3:[{'productId':24,'name':'Son Goku - FB11-001'}]}
   prices={i:[{'productId':p['productId'],'marketPrice':i+0.5} for p in products[i]] for i in products}
   def fake(url):
