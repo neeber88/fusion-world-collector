@@ -163,7 +163,13 @@ def make_feed(catalog,groups,fetch,wait=0.3):
                 n=str(p.get('name',''))
                 safe_unique_alt=(var=='ALT' and sid.startswith(('FB','SB','ST'))
                     and len(matches)==1
-                    and re.search(r'\\(Alternate Art\\)\\s*
+                    and n.lower().strip().endswith('(alternate art)')
+                    and not any(w in clean(n).split() for w in ('super','manga','gold','silver','serialized','winner','event','prize')))
+                if not safe_unique_alt:
+                    stats['unmatched']+=1
+                    if var=='ALT':alt_diagnostics[sid]['name_mismatch']+=1
+                    continue
+                alt_diagnostics[sid]['unique_number_name_fallback']+=1
             price=get_subtype_price(pmap[p['productId']])
             if price is None:
                 stats['no_market_price']+=1
