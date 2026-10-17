@@ -104,6 +104,9 @@ def make_feed(catalog,groups,fetch,wait=0.3):
         prices=fetch(f'{BASE}/{gid}/prices')['results']
         if wait:time.sleep(wait)
         stats['groups_checked']+=1;stats['sets_checked'].append(sid)
+        if sid in ('FS01','FS03','FS11','FB01','FB11','SB01'):
+            alts=[(str(p.get('name') or ''),print_type(p),extract_number(p),p.get('extendedData',[])[:2]) for p in products if print_type(p)=='ALT']
+            print('ALT SOURCE SAMPLE',sid,'total=',len(alts),repr(alts[:6]),flush=True)
         pmap=defaultdict(list)
         for p in prices:pmap[p['productId']].append(p)
         candidates=defaultdict(list)
