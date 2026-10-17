@@ -29,13 +29,21 @@ def download(url):
 
 def group_set(name,sets):
     n=clean(name)
-    # Never assign promo-event reprints to original booster/starter by the card number alone.
-    if any(w in n for w in ('release event','championship','tournament','promotion','promo','prize','energy marker','limited pack','winner','pre release')):return None
+    # Standalone market groups for true promotion printings / energy markers.
+    # Tournament promos are kept separate from booster copies even if the
+    # printed card number is identical.
+    if n in ('fusion world promotion cards and packs', 'tournament and championship promos'):
+        return 'PROMO' if 'PROMO' in sets else None
+    if n == 'fusion world energy markers':
+        return 'ENERGY' if 'ENERGY' in sets else None
+    # Never value a booster / starter copy using a reprint or event market group.
+    if any(w in n for w in ('release event','championship','tournament','promotion','promo','prize','energy marker','limited pack','winner','pre release','prerelease','reprints','reprint')):
+        return None
     for code,meta in sets.items():
         if code in ('PROMO','ENERGY'):continue
         title=clean(meta['name'])
-        if code.startswith('FB') and (n==title or n.startswith(title+' ') and not any(t in n for t in ('release event','prerelease','pre release'))):return code
-        if code.startswith('SB') and (n==title or n.startswith(title+' ')):return code
+        if code.startswith('FB') and n==title:return code
+        if code.startswith('SB') and n==title:return code
         if code=='ST01' and n in ('story booster 01','story booster 1'):return code
     m=re.search(r'\b(?:starter deck(?: ex)?|starter)(?:\s*:?\s*)(\d{1,2})\b',n)
     if m:
@@ -49,6 +57,13 @@ def group_set(name,sets):
     return None
 
 CARD_NUMBER_RE=re.compile(r'\b((?:FB|FS|SB|ST)\d{2}-\d{1,3}|(?:FP|E)-\d{1,3})\b',re.I)
+
+def canonical_number(value):
+    match=CARD_NUMBER_RE.fullmatch(str(value or '').upper())
+    if not match:return str(value or '').upper()
+    prefix,digits=match.group(1).rsplit('-',1)
+    return f'{prefix}-{int(digits)}'
+
 
 def extract_number(product):
     fields={clean(x.get('name')):str(x.get('value','')) for x in product.get('extendedData',[]) if isinstance(x,dict)}
@@ -78,8 +93,8 @@ def make_feed(catalog,groups,fetch,wait=0.3):
     sets={s['id']:s for s in catalog['sets']}
     cards=catalog['cards']
     index=defaultdict(list)
-    for c in cards:index[(c['set'],c['number'].upper(),c['variant'])].append(c)
-    result={};stats={'groups_checked':0,'products_examined':0,'conflicts':0,'reprints_ignored':0,'no_number':0,'unmatched':0,'no_market_price':0,'ambiguous':0,'sets_checked':[]}
+    for c in cards:index[(c['set'],canonical_number(c['number']),c['variant'])].append(c)
+    result={};conflicted_ids=set();stats={'groups_checked':0,'products_examined':0,'conflicts':0,'reprints_ignored':0,'no_number':0,'unmatched':0,'no_market_price':0,'ambiguous':0,'sets_checked':[]}
     for g in groups:
         sid=group_set(g['name'],sets)
         if not sid:continue
@@ -96,11 +111,19 @@ def make_feed(catalog,groups,fetch,wait=0.3):
             stats['products_examined']+=1
             num=extract_number(p)
             if not num:stats['no_number']+=1;continue
-            if not num.startswith(sid+'-'):
+            # Promo catalog entries may carry original FB/FS/SB numbers, but
+            # they must originate in an explicitly promotional market group.
+            if sid=='PROMO':
+                if num.startswith('E-'):
+                    stats['reprints_ignored']+=1;continue
+            elif sid=='ENERGY':
+                if not num.startswith('E-'):
+                    stats['reprints_ignored']+=1;continue
+            elif not num.startswith(sid+'-'):
                 stats['reprints_ignored']+=1;continue
             var=print_type(p)
             if var=='SPECIAL':stats['reprints_ignored']+=1;continue
-            matches=index.get((sid,num,'ALT' if var=='ALT' else 'NORMAL'),[])
+            matches=index.get((sid,canonical_number(num),'ALT' if var=='ALT' else 'NORMAL'),[])
             if not matches:stats['unmatched']+=1;continue
             # Keep name matching strict where product titles carry the printed name.
             pname=str(p.get('name','')).split(' - '+num)[0]
@@ -115,10 +138,19 @@ def make_feed(catalog,groups,fetch,wait=0.3):
                 stats['ambiguous']+=len(rows);continue
             prod,pr,matching=rows[0]
             c=matching[0]
+            if c['id'] in conflicted_ids:
+                stats['conflicts']+=1;continue
             if c['id'] in result:
-                stats['conflicts']+=1;result.pop(c['id'],None);continue
+                stats['conflicts']+=1;result.pop(c['id'],None)
+                conflicted_ids.add(c['id'])
+                continue
             url=str(prod.get('url',''))
             result[c['id']]={'amount':round(pr['marketPrice'],2),'productId':prod['productId'], 'date':dt.datetime.now(dt.timezone.utc).date().isoformat(),'url':url if url.startswith('https://www.tcgplayer.com/') else ''}
+    coverage=defaultdict(lambda:{'catalog':0,'priced':0})
+    for c in cards:
+        coverage[c['set']]['catalog']+=1
+        if c['id'] in result:coverage[c['set']]['priced']+=1
+    stats['by_set']={sid:counts for sid,counts in sorted(coverage.items())}
     return {'kind':'fusion-world-market-prices','schema_version':1,'updated_at':dt.datetime.now(dt.timezone.utc).date().isoformat(),'source':'TCGplayer Market Price via TCGCSV','currency':'USD','prices':result,'stats':{**stats,'priced_variants':len(result),'catalog_variants':len(cards)}}
 
 def main():
@@ -130,6 +162,7 @@ def main():
     Path(args.output).parent.mkdir(parents=True,exist_ok=True)
     Path(args.output).write_text(json.dumps(feed,ensure_ascii=False,indent=2),encoding='utf8')
     print(f"Matched {feed['stats']['priced_variants']} of {feed['stats']['catalog_variants']} printings in {feed['stats']['groups_checked']} groups")
+    print('Set coverage:',json.dumps(feed['stats']['by_set'],sort_keys=True))
     print('Not priced:',feed['stats']['ambiguous'],'ambiguous product/print matches,',feed['stats']['no_market_price'],'missing/inconsistent market prices')
 
 if __name__=='__main__':main()
