@@ -1,0 +1,19 @@
+{
+  "id": "./",
+  "name": "Fusion World Collector 1.8.1",
+  "short_name": "FW Collector",
+  "description": "Kartensammlung mit Stückzahlen, Wunschliste, Detailansicht und Sammlungswert.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#090c16",
+  "theme_color": "#171124",
+  "lang": "de",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
