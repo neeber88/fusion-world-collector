@@ -1,0 +1,51 @@
+name: Daily Fusion World prices and app
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 21 * * *'  # After TCGCSV daily refresh around 20:00 UTC
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fusion-world-prices-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check the matching rules
+        run: python price_tools/test_prices.py
+      - name: Check the app valuation rules
+        run: node price_tools/test_app_logic.cjs
+      - name: Generate today's TCGplayer market prices
+        run: |
+          mkdir -p dist
+          python price_tools/build_price_feed.py --catalog catalog.json --output dist/prices.json --min-prices 25
+      - name: Prepare website
+        run: |
+          cp index.html app.js styles.css catalog.json seed.json coverage.json service-worker.js manifest.webmanifest icon.svg dist/
+          touch dist/.nojekyll
+      - name: Upload app and prices
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - id: deployment
+        name: Publish today's prices to GitHub Pages
+        uses: actions/deploy-pages@v4
