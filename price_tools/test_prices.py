@@ -1,6 +1,6 @@
 import json,unittest
 from pathlib import Path
-from build_price_feed import group_set,print_type,get_subtype_price,make_feed,canonical_number,BASE
+from build_price_feed import group_set,print_type,get_subtype_price,make_feed,canonical_number,printed_name,BASE
 class ImportTests(unittest.TestCase):
  def setUp(self):
   self.catalog={'sets':[{'id':'FB11','name':'Brightness of Hope'},{'id':'FS10','name':'Giblet EX'},{'id':'PROMO','name':'Promo'},{'id':'ENERGY','name':'Energy Marker'}],'cards':[
@@ -60,6 +60,19 @@ class ImportTests(unittest.TestCase):
   self.assertEqual(canonical_number('E-002'),canonical_number('E-2'))
   self.assertEqual(canonical_number('FS01-016'),canonical_number('FS01-16'))
   self.assertEqual(canonical_number('FP-001'),canonical_number('FP-1'))
+ def test_alt_qualifiers_are_not_character_names(self):
+  self.assertEqual(printed_name({'name':'Whis (Bonus Pack Alternate Art)','extendedData':[{'name':'Number','value':'FS01-02'}]},'FS01-02'),'Whis')
+  self.assertEqual(printed_name({'name':'Son Goku - FB01-139 (Alternate Art)'},'FB01-139'),'Son Goku')
+  self.assertEqual(printed_name({'name':'Shallet (Super Alternate Art)'},'FB11-122'),'Shallet')
+  self.assertEqual(printed_name({'name':'Son Gohan : Adolescence (Bonus Pack Alternate Art)'},'FS01-09'),'Son Gohan : Adolescence')
+ def test_bonus_pack_alts_match_only_the_single_exact_card(self):
+  catalogue={'sets':[{'id':'FS01','name':'Son Goku'}],'cards':[{'set':'FS01','number':'FS01-02','variant':'NORMAL','id':'FS01-02#BASE','name':'Whis'},{'set':'FS01','number':'FS01-02','variant':'ALT','id':'FS01-02#ALT-1','name':'Whis'}]}
+  products=[{'productId':900,'name':'Whis (Bonus Pack Alternate Art)','extendedData':[{'name':'Number','value':'FS01-02'}]}]
+  prices=[{'productId':900,'marketPrice':12.25,'subTypeName':'Normal'}]
+  def mock(url):return {'results':products if url.endswith('/products') else prices}
+  result=make_feed(catalogue,[{'name':'Starter Deck 01','groupId':1}],mock,0)
+  self.assertNotIn('FS01-02#BASE',result['prices'])
+  self.assertEqual(result['prices']['FS01-02#ALT-1']['amount'],12.25)
  def test_mixed_market_subtypes_ignored(self):
   self.assertIsNone(get_subtype_price([{'marketPrice':1.23},{'marketPrice':2.99}]))
 if __name__=='__main__':unittest.main()
