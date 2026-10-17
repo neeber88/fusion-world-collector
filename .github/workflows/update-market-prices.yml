@@ -2,6 +2,12 @@ name: Daily Fusion World prices and app
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'price_tools/**'
+      - 'catalog.json'
+      - '.github/workflows/update-market-prices.yml'
   schedule:
     - cron: '30 21 * * *'  # After TCGCSV daily refresh around 20:00 UTC
 
