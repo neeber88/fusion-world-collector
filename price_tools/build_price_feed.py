@@ -104,6 +104,10 @@ def make_feed(catalog,groups,fetch,wait=0.3):
         prices=fetch(f'{BASE}/{gid}/prices')['results']
         if wait:time.sleep(wait)
         stats['groups_checked']+=1;stats['sets_checked'].append(sid)
+        if sid=='ENERGY':
+            debug=[(str(p.get('name',''))[:90],extract_number(p),print_type(p)) for p in products]
+            print('ENERGY group:',g['name'],'products=',len(products),'sample=',debug[:14],flush=True)
+            print('ENERGY with extracted numbers:',[row for row in debug if row[1]][:14],flush=True)
         pmap=defaultdict(list)
         for p in prices:pmap[p['productId']].append(p)
         candidates=defaultdict(list)
