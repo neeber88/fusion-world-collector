@@ -79,6 +79,15 @@ def print_type(product):
     if re.search(r'\b(alternate|alt art|alternative|parallel|bonus pack)\b',n):return 'ALT'
     return 'BASE'
 
+def printed_name(product,number):
+    """Strip only known TCGplayer print-style labels, never the actual card name.
+    Number might come from extendedData rather than the visible product title.
+    """
+    name=str(product.get('name') or '').strip()
+    name=re.split(r'\s+-\s+'+re.escape(number)+r'(?=\s|$)',name,maxsplit=1,flags=re.I)[0]
+    name=re.sub(r'\s*\((?:bonus pack |super )?(?:alternate art|alt art|parallel)\)\s*$', '',name,flags=re.I)
+    return name.strip()
+
 def get_subtype_price(pairs):
     available=[p for p in pairs if isinstance(p.get('marketPrice'),(int,float)) and 0 <= p['marketPrice'] <= 1e6]
     if not available:return None
@@ -104,9 +113,6 @@ def make_feed(catalog,groups,fetch,wait=0.3):
         prices=fetch(f'{BASE}/{gid}/prices')['results']
         if wait:time.sleep(wait)
         stats['groups_checked']+=1;stats['sets_checked'].append(sid)
-        if sid in ('FS01','FS03','FS11','FB01','FB11','SB01'):
-            alts=[(str(p.get('name') or ''),print_type(p),extract_number(p),p.get('extendedData',[])[:2]) for p in products if print_type(p)=='ALT']
-            print('ALT SOURCE SAMPLE',sid,'total=',len(alts),repr(alts[:6]),flush=True)
         pmap=defaultdict(list)
         for p in prices:pmap[p['productId']].append(p)
         candidates=defaultdict(list)
@@ -129,7 +135,7 @@ def make_feed(catalog,groups,fetch,wait=0.3):
             matches=index.get((sid,canonical_number(num),'ALT' if var=='ALT' else 'NORMAL'),[])
             if not matches:stats['unmatched']+=1;continue
             # Keep name matching strict where product titles carry the printed name.
-            pname=str(p.get('name','')).split(' - '+num)[0]
+            pname=printed_name(p,num)
             if sid=='ENERGY':
                 # TCGplayer labels the character series 'Energy Marker (E-28)'
                 # rather than the plain catalog name. Require an explicit E-xx
