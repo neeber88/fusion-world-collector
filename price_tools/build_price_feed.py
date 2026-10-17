@@ -104,10 +104,6 @@ def make_feed(catalog,groups,fetch,wait=0.3):
         prices=fetch(f'{BASE}/{gid}/prices')['results']
         if wait:time.sleep(wait)
         stats['groups_checked']+=1;stats['sets_checked'].append(sid)
-        if sid=='ENERGY':
-            debug=[(str(p.get('name',''))[:90],extract_number(p),print_type(p)) for p in products]
-            print('ENERGY group:',g['name'],'products=',len(products),'sample=',debug[:14],flush=True)
-            print('ENERGY with extracted numbers:',[row for row in debug if row[1]][:14],flush=True)
         pmap=defaultdict(list)
         for p in prices:pmap[p['productId']].append(p)
         candidates=defaultdict(list)
@@ -131,7 +127,14 @@ def make_feed(catalog,groups,fetch,wait=0.3):
             if not matches:stats['unmatched']+=1;continue
             # Keep name matching strict where product titles carry the printed name.
             pname=str(p.get('name','')).split(' - '+num)[0]
-            if pname and clean(pname) not in (clean(c['name']) for c in matches):
+            if sid=='ENERGY':
+                # TCGplayer labels the character series 'Energy Marker (E-28)'
+                # rather than the plain catalog name. Require an explicit E-xx
+                # number from the dedicated marker group; E01-xx series labels
+                # are NOT equivalent and require a separate verified crosswalk.
+                if not clean(p.get('name','')).startswith('energy marker '):
+                    stats['unmatched']+=1;continue
+            elif pname and clean(pname) not in (clean(c['name']) for c in matches):
                 stats['unmatched']+=1;continue
             price=get_subtype_price(pmap[p['productId']])
             if price is None:stats['no_market_price']+=1;continue
