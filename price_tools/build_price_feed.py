@@ -155,9 +155,65 @@ def make_feed(catalog,groups,fetch,wait=0.3):
                 if not clean(p.get('name','')).startswith('energy marker '):
                     stats['unmatched']+=1;continue
             elif pname and clean(pname) not in (clean(c['name']) for c in matches):
-                stats['unmatched']+=1
-                if var=='ALT':alt_diagnostics[sid]['name_mismatch']+=1
+                # Some dual/awakened leaders have a different product title,
+                # but the printed card number identifies one and only one ALT
+                # slot. Accept that case only for a standard "(Alternate Art)"
+                # product in its exact booster group. Never collapse distinct
+                # Super/Manga/Gold prints or multiple catalog ALT slots.
+                n=str(p.get('name',''))
+                safe_unique_alt=(var=='ALT' and sid.startswith(('FB','SB','ST'))
+                    and len(matches)==1
+                    and re.search(r'\\(Alternate Art\\)\\s*
+            price=get_subtype_price(pmap[p['productId']])
+            if price is None:
+                stats['no_market_price']+=1
+                if var=='ALT':alt_diagnostics[sid]['market_price_missing_or_ambiguous']+=1
                 continue
+            candidates[(sid,num,var)].append((p,price,matches))
+        for key,rows in candidates.items():
+            # Exactly one market product and one matching official print.
+            if len(rows)!=1 or len(rows[0][2])!=1:
+                stats['ambiguous']+=len(rows)
+                if key[2]=='ALT':alt_diagnostics[key[0]]['printing_ambiguity']+=len(rows)
+                continue
+            prod,pr,matching=rows[0]
+            c=matching[0]
+            if c['id'] in conflicted_ids:
+                stats['conflicts']+=1;continue
+            if c['id'] in result:
+                stats['conflicts']+=1;result.pop(c['id'],None)
+                conflicted_ids.add(c['id'])
+                continue
+            url=str(prod.get('url',''))
+            result[c['id']]={'amount':round(pr['marketPrice'],2),'productId':prod['productId'], 'date':dt.datetime.now(dt.timezone.utc).date().isoformat(),'url':url if url.startswith('https://www.tcgplayer.com/') else ''}
+    coverage=defaultdict(lambda:{'catalog':0,'priced':0})
+    for c in cards:
+        coverage[c['set']]['catalog']+=1
+        if c['id'] in result:coverage[c['set']]['priced']+=1
+    stats['by_set']={sid:counts for sid,counts in sorted(coverage.items())}
+    stats['alt_diagnostics']={k:dict(v) for k,v in sorted(alt_diagnostics.items())}
+    return {'kind':'fusion-world-market-prices','schema_version':1,'updated_at':dt.datetime.now(dt.timezone.utc).date().isoformat(),'source':'TCGplayer Market Price via TCGCSV','currency':'USD','prices':result,'stats':{**stats,'priced_variants':len(result),'catalog_variants':len(cards)}}
+
+def main():
+    p=argparse.ArgumentParser();p.add_argument('--catalog',default='catalog.json');p.add_argument('--output',default='prices.json');p.add_argument('--delay',type=float,default=0.4);p.add_argument('--min-prices',type=int,default=0);args=p.parse_args()
+    catalog=json.loads(Path(args.catalog).read_text(encoding='utf8'))
+    groups=download(f'{BASE}/groups')['results']
+    feed=make_feed(catalog,groups,download,args.delay)
+    if feed['stats']['priced_variants']<args.min_prices:raise RuntimeError(f"Zu wenige zugeordnete Kartenpreise: {feed['stats']['priced_variants']} (Minimum {args.min_prices}). Alter Online-Preisstand wird nicht überschrieben.")
+    Path(args.output).parent.mkdir(parents=True,exist_ok=True)
+    Path(args.output).write_text(json.dumps(feed,ensure_ascii=False,indent=2),encoding='utf8')
+    print(f"Matched {feed['stats']['priced_variants']} of {feed['stats']['catalog_variants']} printings in {feed['stats']['groups_checked']} groups")
+    print('Set coverage:',json.dumps(feed['stats']['by_set'],sort_keys=True))
+    print('ALT diagnostics:',json.dumps(feed['stats']['alt_diagnostics'],sort_keys=True))
+    print('Not priced:',feed['stats']['ambiguous'],'ambiguous product/print matches,',feed['stats']['no_market_price'],'missing/inconsistent market prices')
+
+if __name__=='__main__':main(),n,re.I)
+                    and not re.search(r'\\b(super|manga|gold|silver|serialized|winner|event|prize)\\b',n,re.I))
+                if not safe_unique_alt:
+                    stats['unmatched']+=1
+                    if var=='ALT':alt_diagnostics[sid]['name_mismatch']+=1
+                    continue
+                alt_diagnostics[sid]['unique_number_name_fallback']+=1
             price=get_subtype_price(pmap[p['productId']])
             if price is None:
                 stats['no_market_price']+=1
