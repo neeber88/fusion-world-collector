@@ -73,6 +73,22 @@ class ImportTests(unittest.TestCase):
   result=make_feed(catalogue,[{'name':'Starter Deck 01','groupId':1}],mock,0)
   self.assertNotIn('FS01-02#BASE',result['prices'])
   self.assertEqual(result['prices']['FS01-02#ALT-1']['amount'],12.25)
+ def test_fs12_gold_leader_is_unique_alt_not_base(self):
+  cat={'sets':[{'id':'FS12','name':'The Beat of Ki'},{'id':'FB11','name':'Brightness of Hope'}], 'cards':[
+    {'set':'FS12','number':'FS12-01','variant':'NORMAL','id':'FS12-01#BASE','name':'Son Goku'},
+    {'set':'FS12','number':'FS12-01','variant':'ALT','id':'FS12-01#ALT-1','name':'Son Goku'},
+    {'set':'FB11','number':'FB11-001','variant':'ALT','id':'FB11-001#ALT-1','name':'Son Goku'}]}
+  group=[{'name':'Starter Deck EX 12: The Beat of Ki','groupId':12}, {'name':'Brightness of Hope','groupId':11}]
+  products={12:[{'productId':201,'name':'Son Goku - FS12-01'},
+                {'productId':202,'name':'Son Goku - FS12-01 (Gold)'}],
+            11:[{'productId':203,'name':'Son Goku - FB11-001 (Gold)'}]}
+  prices={12:[{'productId':201,'marketPrice':0.50},{'productId':202,'marketPrice':65.24}],11:[{'productId':203,'marketPrice':999.99}]}
+  def fake(url):
+   group_id=int(url.split('/')[-2]);return {'results':products[group_id] if url.endswith('/products') else prices[group_id]}
+  result=make_feed(cat,group,fake,0)['prices']
+  self.assertEqual(result['FS12-01#BASE']['amount'],0.5)
+  self.assertEqual(result['FS12-01#ALT-1']['amount'],65.24)
+  self.assertNotIn('FB11-001#ALT-1',result)
  def test_mixed_market_subtypes_ignored(self):
   self.assertIsNone(get_subtype_price([{'marketPrice':1.23},{'marketPrice':2.99}]))
 if __name__=='__main__':unittest.main()
