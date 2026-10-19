@@ -197,6 +197,16 @@ def make_feed(catalog,groups,fetch,wait=0.3):
         coverage[c['set']]['catalog']+=1
         if c['id'] in result:coverage[c['set']]['priced']+=1
     stats['by_set']={sid:counts for sid,counts in sorted(coverage.items())}
+    # Explicit audit of unpriced print IDs; do not infer prices from related arts.
+    missing_by_category=defaultdict(list)
+    category_for_set={item['id']:item.get('category','Unknown') for item in catalog['sets']}
+    for card in cards:
+        if card['id'] not in result:
+            missing_by_category[category_for_set.get(card['set'],'Unknown')].append({
+                'id':card['id'], 'set':card['set'], 'number':card['number'],
+                'name':card['name'], 'variant':card['variant']})
+    stats['missing_by_category_counts']={k:len(v) for k,v in sorted(missing_by_category.items())}
+    stats['missing_print_ids']={k:[v['id'] for v in vals] for k,vals in sorted(missing_by_category.items())}
     stats['alt_diagnostics']={k:dict(v) for k,v in sorted(alt_diagnostics.items())}
     return {'kind':'fusion-world-market-prices','schema_version':1,'updated_at':dt.datetime.now(dt.timezone.utc).date().isoformat(),'source':'TCGplayer Market Price via TCGCSV','currency':'USD','prices':result,'stats':{**stats,'priced_variants':len(result),'catalog_variants':len(cards)}}
 
@@ -209,6 +219,17 @@ def main():
     Path(args.output).parent.mkdir(parents=True,exist_ok=True)
     Path(args.output).write_text(json.dumps(feed,ensure_ascii=False,indent=2),encoding='utf8')
     print(f"Matched {feed['stats']['priced_variants']} of {feed['stats']['catalog_variants']} printings in {feed['stats']['groups_checked']} groups")
+    audit_path=Path(args.output).with_name('missing-price-report.json')
+    missing={}
+    by_id={c['id']:c for c in catalog['cards']}
+    for category,ids in feed['stats']['missing_print_ids'].items():
+        missing[category]=[{key:by_id[id].get(key,'') for key in ('id','set','number','name','variant')} for id in ids]
+    audit={'generated_at':feed['updated_at'],'source':feed['source'],
+           'priced_variants':len(feed['prices']),'catalog_variants':len(catalog['cards']),
+           'missing_by_category':missing,'ambiguous_market_matches':feed['stats']['ambiguous'],
+           'no_market_price':feed['stats']['no_market_price']}
+    audit_path.write_text(json.dumps(audit,ensure_ascii=False,indent=2),encoding='utf8')
+    print('Missing price report:',audit_path)
     print('Set coverage:',json.dumps(feed['stats']['by_set'],sort_keys=True))
     print('ALT diagnostics:',json.dumps(feed['stats']['alt_diagnostics'],sort_keys=True))
     print('Not priced:',feed['stats']['ambiguous'],'ambiguous product/print matches,',feed['stats']['no_market_price'],'missing/inconsistent market prices')
