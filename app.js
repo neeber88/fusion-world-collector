@@ -212,6 +212,18 @@ function valueTotals(){
   priced,count:owned.length,pricedCopies,unpricedCopies,totalCopies,normalCopies,altCopies,
   duplicateCopies,cost:state.purchases.reduce((sum,p)=>sum+p.amount,0)}
 }
+function priceGapSummary(){
+ const groups=['Starter','Booster','Promo','Energy'];const report={};
+ for(const cat of groups)report[cat]={total:0,priced:0,owned:0,ownedPriced:0,missing:[]};
+ for(const c of cards){const cat=sets.find(x=>x.id===c.set)?.category||'Energy';if(!report[cat])continue;const g=report[cat];g.total++;if(unitPrice(c.id)!==null)g.priced++;if(isOwned(c.id)){g.owned++;if(unitPrice(c.id)!==null)g.ownedPriced++;else g.missing.push(c)}}
+ return report;
+}
+function priceGapPanel(){
+ const g=priceGapSummary();const cats=['Starter','Booster','Promo','Energy'];const rows=cats.map(cat=>{const d=g[cat];return `<div class="value-line"><span>${cat} · ${d.ownedPriced}/${d.owned} eigene Varianten bepreist</span><b>${d.priced}/${d.total} Katalog</b></div>`}).join('');
+ const unpriced=cats.flatMap(cat=>g[cat].missing).sort((a,b)=>a.set.localeCompare(b.set)||a.number.localeCompare(b.number));
+ const cardsHtml=unpriced.map(c=>`<div class="value-line"><span>${escapeHtml(c.number)} · ${escapeHtml(c.name)} · ${escapeHtml(variantLabel(c))}</span><b>—</b></div>`).join('');
+ return `<section class="value-block panel"><h2>Preisabdeckung</h2><p>Fehlende Preise bleiben unbekannt und zählen nicht als 0 USD. ALT-Versionen werden getrennt bewertet.</p>${rows}<details><summary>${unpriced.length} eigene Kartenvarianten ohne Preis anzeigen</summary>${cardsHtml||'<p>Alle vorhandenen Varianten haben einen Preis.</p>'}</details></section>`;
+}
 function valuePage(){
  const t=valueTotals();
  const top=cards.filter(c=>isOwned(c.id)&&unitPrice(c.id)!==null)
@@ -238,7 +250,7 @@ function valuePage(){
  <summary aria-label="Einzelne Ausgaben anzeigen oder ausblenden"><span class="spending-heading"><span>Gesamtausgaben</span><strong>${money(t.cost)}</strong></span><span class="spending-chevron" aria-hidden="true">⌄</span></summary>
  <div class="spending-expanded"><button class="btn primary" data-action="addPurchase">+ Kauf eintragen</button>
  <div class="purchase-list">${purchases||'<p class="small">Noch keine Ausgaben eingetragen.</p>'}</div></div></details></section>
- <section class="price-coverage panel value-coverage-bottom"><strong>${t.totalCopies} Exemplare · ${t.count} Varianten · ${t.duplicateCopies} Dubletten</strong>
+ ${priceGapPanel()}<section class="price-coverage panel value-coverage-bottom"><strong>${t.totalCopies} Exemplare · ${t.count} Varianten · ${t.duplicateCopies} Dubletten</strong>
  <p>${t.pricedCopies}/${t.totalCopies} Exemplare bepreist${t.unpricedCopies?` · ${t.unpricedCopies} ohne Preis (Wert ist eine Teilsumme)`:''} · Stand: ${escapeHtml(state.marketPriceUpdated||'offen')}</p></section>`;
 }
 let modalReturnFocus=null;
