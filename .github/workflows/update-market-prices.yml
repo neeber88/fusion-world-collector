@@ -7,6 +7,12 @@ on:
     paths:
       - 'price_tools/**'
       - 'catalog.json'
+      - 'index.html'
+      - 'app.js'
+      - 'styles.css'
+      - 'service-worker.js'
+      - 'manifest.webmanifest'
+      - 'icon.svg'
       - '.github/workflows/update-market-prices.yml'
   schedule:
     - cron: '30 21 * * *'  # After TCGCSV daily refresh around 20:00 UTC
