@@ -17,10 +17,21 @@ const PACKS={
  FS09:{accent:'#62b9ff',glow:'#ffc65b',shadow:'#192b59',figure:'Shallot',url:'https://fr.dragon-ball-official.com/dragonball/jp/news/2025/06/t250614124-2.jpg?_=1775538420',size:'310px 310px',pos:'-34px -25px'},
  FS10:{accent:'#aaf852',glow:'#f558ae',shadow:'#263c22',figure:'Giblet',url:'https://fr.dragon-ball-official.com/dragonball/jp/news/2025/06/t250614124-2.jpg?_=1775538420',size:'310px 310px',pos:'-155px -25px'},
  FS11:{accent:'#ffad52',glow:'#f44b3f',shadow:'#572416',figure:'Son Goku · Super Saiyan 3',url:'https://shop.r10s.jp/suns-online-store/cabinet/tradingcard/11840152/imgrc0127276210.jpg',size:'310px 310px',pos:'-32px -25px'},
- FS12:{accent:'#ffe05b',glow:'#7bdf9e',shadow:'#4d3817',figure:'Son Goku · Super Saiyan',url:'https://shop.r10s.jp/suns-online-store/cabinet/tradingcard/11840152/imgrc0127276210.jpg',size:'310px 310px',pos:'-153px -25px'}
+ FS12:{accent:'#ffe05b',glow:'#7bdf9e',shadow:'#4d3817',figure:'Son Goku · Super Saiyan',url:'https://shop.r10s.jp/suns-online-store/cabinet/tradingcard/11840152/imgrc0127276210.jpg',size:'310px 310px',pos:'-153px -25px'},
+ FB01:{accent:'#35bdf5',glow:'#a9e6ff',shadow:'#102746',figure:'Son Goku · Super Saiyan Blue',leader:'FB01-001'},
+ FB02:{accent:'#ed4d35',glow:'#ffb956',shadow:'#4b1826',figure:'Son Goku · Super Saiyan God',leader:'FB02-001'},
+ FB03:{accent:'#e9ae44',glow:'#fff18e',shadow:'#47301b',figure:'Son Goku · GT',leader:'FB03-104'},
+ FB04:{accent:'#8b67e8',glow:'#9ee2ff',shadow:'#281a59',figure:'Son Goku · Ultra Instinct',leader:'FB04-001'},
+ FB05:{accent:'#e79939',glow:'#79e4ff',shadow:'#553b1b',figure:'Son Goku (Mini) · DA',leader:'FB05-001'},
+ FB06:{accent:'#63ca64',glow:'#a9ed86',shadow:'#224b34',figure:'Broly · BR',leader:'FB06-048'},
+ FB07:{accent:'#4fae99',glow:'#e6cf6d',shadow:'#193d3c',figure:'Shenron',leader:'FB07-097'},
+ FB08:{accent:'#cb6b72',glow:'#ffc37b',shadow:'#4f2635',figure:'Son Gohan · Adolescence',leader:'FB08-001'},
+ FB09:{accent:'#bc75ec',glow:'#7addf5',shadow:'#392557',figure:'Gogeta · BR',leader:'FB09-001'},
+ FB10:{accent:'#6f9ef4',glow:'#e57cc6',shadow:'#202d60',figure:'Son Goku',leader:'FB10-001'},
+ FB11:{accent:'#e7a64d',glow:'#ffca7a',shadow:'#583025',figure:'Son Goku · Legends',leader:'FB11-001'}
 };
 function getPack(id){return PACKS[id]||{accent:'#ff9753',glow:'#ffdc5e',shadow:'#412a49',figure:'Fusion World',url:'',size:'cover',pos:'center'}}
-function packVisual(id,mini=false){const p=getPack(id);const leader=PACKS[id]?`https://static.dotgg.gg/dragonball/card/${id}-01.webp`:'';return `<div class="pack-art ${mini?'mini':''}" aria-hidden="true" style="--pack-source:url(&quot;${escapeHtml(p.url)}&quot;);--pack-size:${escapeHtml(p.size)};--pack-position:${escapeHtml(p.pos)}"><div class="pack-silhouette">${escapeHtml(id)}</div>${!mini&&leader?`<img class="character-portrait" src="${escapeHtml(leader)}" alt="" loading="lazy" onerror="this.style.display='none'">`:''}<div class="pack-photo"></div></div>`}
+function packVisual(id,mini=false){const p=getPack(id);const leaderId=p.leader||((id.startsWith('FS')||id.startsWith('FB'))?id+'-01':'');const leader=leaderId?`https://static.dotgg.gg/dragonball/card/${leaderId}.webp`:'';return `<div class="pack-art ${mini?'mini':''}" aria-hidden="true"><div class="pack-silhouette">${escapeHtml(id)}</div>${leader?`<img class="character-portrait" src="${escapeHtml(leader)}" alt="" loading="lazy" onerror="this.style.display='none'">`:''}</div>`}
 function applyTheme(){
  const current=(view==='collection'&&selectedSet!=='ALL'&&PACKS[selectedSet])?selectedSet:'';
  const t=current?getPack(current):{accent:'#ff9f47',glow:'#ffdf62',shadow:'#2b1849'};
