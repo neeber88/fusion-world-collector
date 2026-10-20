@@ -39,7 +39,7 @@ function applyTheme(){
  r.style.setProperty('--theme',t.accent);
  r.style.setProperty('--theme-glow',t.glow);
  r.style.setProperty('--theme-shadow',t.shadow);
- r.style.setProperty('--page-figure',current?`url("https://static.dotgg.gg/dragonball/card/${current}-01.webp")`:'none');
+ r.style.setProperty('--page-figure',current?`url("https://static.dotgg.gg/dragonball/card/${getPack(current).leader||current+'-01'}.webp")`:'none');
  if(document.body) document.body.dataset.currentSet=current||'dashboard';
 }
 
