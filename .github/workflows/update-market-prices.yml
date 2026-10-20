@@ -64,6 +64,15 @@ jobs:
           live_path.write_text(json.dumps(live, ensure_ascii=False, separators=(',', ':')))
           print(f'Validated price feed: {len(live_prices)} prices ({added} retained from verified baseline)')
           PY
+      - name: Audit all remaining booster and starter product IDs live
+        run: python price_tools/live_id_audit.py
+      - name: Upload per-product TCGCSV price evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: fusion-world-live-product-id-audit
+          path: |
+            dist/price-id-audit.csv
+            dist/price-id-audit-summary.json
       - name: Prepare website
         run: |
           cp index.html app.js styles.css catalog.json seed.json coverage.json service-worker.js manifest.webmanifest icon.svg dist/
