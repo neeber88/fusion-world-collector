@@ -40,6 +40,30 @@ jobs:
         run: |
           mkdir -p dist
           python price_tools/build_price_feed.py --catalog catalog.json --output dist/prices.json --min-prices 25
+      - name: Retain verified variant prices missing from today's feed
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          live_path = Path('dist/prices.json')
+          baseline_path = Path('price_tools/verified-price-baseline.json')
+          live = json.loads(live_path.read_text())
+          base = json.loads(baseline_path.read_text())
+          catalog = json.loads(Path('catalog.json').read_text())
+          valid = {c['id'] for c in catalog['cards']}
+          live_prices = live.setdefault('prices', {})
+          added = 0
+          for key, value in base['prices'].items():
+              if key in valid and key not in live_prices and isinstance(value.get('amount'), (float, int)):
+                  live_prices[key] = value
+                  added += 1
+          stats = live.setdefault('stats', {})
+          stats['verified_baseline_added'] = added
+          stats['total_app_prices'] = len(live_prices)
+          stats['verified_baseline_date'] = base['updated_at']
+          live_path.write_text(json.dumps(live, ensure_ascii=False, separators=(',', ':')))
+          print(f'Validated price feed: {len(live_prices)} prices ({added} retained from verified baseline)')
+          PY
       - name: Prepare website
         run: |
           cp index.html app.js styles.css catalog.json seed.json coverage.json service-worker.js manifest.webmanifest icon.svg dist/
