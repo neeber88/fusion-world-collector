@@ -10,7 +10,7 @@ def load(url):
     if not obj.get('success',False):raise ValueError('TCGCSV failed: '+url)
     return obj['results']
 def number(s):
-    m=re.search(r'\\b(?:FB|FS|SB|ST)\\d{2}-\\d{1,3}\\b',str(s or ''),re.I)
+    m=re.search(r'\b(?:FB|FS|SB|ST)\d{2}-\d{1,3}\b',str(s or ''),re.I)
     return m.group(0).upper() if m else ''
 def print_group(name, sets):
     n=name.lower()
@@ -18,7 +18,7 @@ def print_group(name, sets):
         if not key.startswith(('FB','FS','SB','ST')):continue
         if key.startswith(('FB','SB')) and title.lower()==n:return key
         if key=='ST01' and ('story booster' in n):return key
-        if key.startswith('FS') and re.search(r'starter deck(?: ex)?\\s*:?\\s*0?'+str(int(key[2:]))+r'(?:\\D|$)',n):return key
+        if key.startswith('FS') and re.search(r'starter deck(?: ex)?\s*:?\s*0?'+str(int(key[2:]))+r'(?:\D|$)',n):return key
     return None
 def kind(name):
     n=name.lower()
