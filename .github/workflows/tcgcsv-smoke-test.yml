@@ -1,0 +1,47 @@
+name: TCGCSV connectivity smoke test
+on:
+  push:
+    paths:
+      - '.github/workflows/tcgcsv-smoke-test.yml'
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check TCGCSV category 80 and product/price joins
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request, time, sys
+          base = "https://tcgcsv.com/tcgplayer/80"
+          headers = {"User-Agent": "FusionWorldCollector-ConnectivityTest/1.0", "Accept":"application/json"}
+          def get(path):
+              url = base + path
+              req = urllib.request.Request(url, headers=headers)
+              with urllib.request.urlopen(req, timeout=30) as response:
+                  value = json.load(response)
+              assert value.get("success") is True, "TCGCSV response was not successful: " + path
+              print("OK",path, "records:",len(value.get("results",[])))
+              time.sleep(0.25)
+              return value["results"]
+          groups = get("/groups")
+          match = next((g for g in groups if g["groupId"] == 23401), None)
+          assert match and "Awakened Pulse" in match["name"], "Awakened Pulse group not found"
+          products = get("/23401/products")
+          prices = get("/23401/prices")
+          product_ids = {x["productId"] for x in products}
+          joins = [x for x in prices if x["productId"] in product_ids and isinstance(x.get("marketPrice"),(float,int))]
+          assert products and prices and joins, "No product/market price join"
+          print("PASS: category=80, group=23401, matches=",len(joins))
+          with open("tcgcsv-test-result.json","w") as f:
+              json.dump({"success":True,"category_id":80,"group_id":23401,"group_name":match["name"],"groups":len(groups),"products":len(products),"prices":len(prices),"marketprice_matches":len(joins)},f,indent=2)
+          PY
+      - name: Upload test result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tcgcsv-connectivity-result
+          path: tcgcsv-test-result.json
+          if-no-files-found: ignore
