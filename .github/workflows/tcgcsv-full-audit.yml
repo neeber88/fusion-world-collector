@@ -1,0 +1,75 @@
+name: TCGCSV Full Coverage Audit
+on:
+  push:
+    paths:
+      - '.github/workflows/tcgcsv-full-audit.yml'
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - name: Download all Fusion World group products and prices
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import urllib.request,json,time,csv,os,collections
+          base="https://tcgcsv.com/tcgplayer/80"
+          headers={"User-Agent":"FusionWorldCollector-CoverageAudit/1.0","Accept":"application/json"}
+          def fetch(path):
+              last=None
+              for i in range(4):
+                  try:
+                      req=urllib.request.Request(base+path,headers=headers)
+                      with urllib.request.urlopen(req,timeout=45) as resp: data=json.load(resp)
+                      if not data.get("success"): raise ValueError("success false")
+                      return data["results"]
+                  except Exception as e:
+                      last=e; time.sleep(2**i)
+              raise RuntimeError(f"{path}: {last}")
+          groups=fetch("/groups")
+          output=[]; products_out=[]; failures=[]
+          for idx,g in enumerate(groups,1):
+              gid=g["groupId"]; name=g.get("name","")
+              try:
+                  products=fetch(f"/{gid}/products")
+                  prices=fetch(f"/{gid}/prices")
+                  product_ids={x.get("productId") for x in products}
+                  pricemap=collections.defaultdict(list)
+                  for p in prices: pricemap[p.get("productId")].append(p)
+                  matched=0; priced_products=0; unpriced=[]
+                  for product in products:
+                      pid=product.get("productId")
+                      rows=pricemap.get(pid,[])
+                      valid=[p for p in rows if isinstance(p.get("marketPrice"),(int,float)) and p["marketPrice"]>=0]
+                      if rows: matched+=1
+                      if valid: priced_products+=1
+                      else: unpriced.append(pid)
+                      products_out.append({"group_id":gid,"group_name":name,"product_id":pid,"product_name":product.get("name",""),"price_record_count":len(rows),"market_price_count":len(valid),"market_price_values":";".join(str(p["marketPrice"]) for p in valid),"subtypes":";".join(str(p.get("subTypeName","")) for p in valid)})
+                  row={"group_id":gid,"group_name":name,"products":len(products),"price_records":len(prices),"products_with_price_record":matched,"products_with_market_price":priced_products,"products_without_market_price":len(unpriced),"extra_price_product_ids":len({p.get("productId") for p in prices}-product_ids)}
+                  output.append(row)
+                  print(f"[{idx}/{len(groups)}] {gid} {name} products={len(products)} market={priced_products} missing={len(unpriced)}",flush=True)
+              except Exception as e:
+                  failures.append({"group_id":gid,"group_name":name,"error":str(e)})
+                  print(f"[{idx}/{len(groups)}] ERROR {gid}: {e}",flush=True)
+              time.sleep(0.2)
+          total=lambda k:sum(r[k] for r in output)
+          summary={"category_id":80,"groups_discovered":len(groups),"groups_completed":len(output),"groups_failed":len(failures),"products_total":total("products"),"products_with_market_price":total("products_with_market_price"),"products_without_market_price":total("products_without_market_price"),"price_records_total":total("price_records"),"not_yet_matched_to_app":True,"failures":failures}
+          os.makedirs("tcgcsv-audit",exist_ok=True)
+          with open("tcgcsv-audit/summary.json","w") as f:json.dump(summary,f,indent=2)
+          with open("tcgcsv-audit/groups.csv","w",newline="") as f:
+              w=csv.DictWriter(f,fieldnames=["group_id","group_name","products","price_records","products_with_price_record","products_with_market_price","products_without_market_price","extra_price_product_ids"]);w.writeheader();w.writerows(output)
+          with open("tcgcsv-audit/products.csv","w",newline="") as f:
+              w=csv.DictWriter(f,fieldnames=["group_id","group_name","product_id","product_name","price_record_count","market_price_count","market_price_values","subtypes"]);w.writeheader();w.writerows(products_out)
+          print("SUMMARY",json.dumps(summary),flush=True)
+          if failures: raise SystemExit(f"{len(failures)} groups failed; see summary artifact")
+          PY
+      - name: Upload raw coverage audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tcgcsv-full-coverage-audit
+          path: tcgcsv-audit/
+          if-no-files-found: warn
