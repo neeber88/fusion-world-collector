@@ -20,11 +20,12 @@ category_id=cat["categoryId"]
 groups=fetch(f"{api}/{category_id}/groups")
 # Collect only one unambiguous price per product; never choose arbitrarily between subtypes.
 all_prices={}
+wanted_ids=set(ids.values())
 for group in groups:
     rows=fetch(f"{api}/{category_id}/{group['groupId']}/prices")
     for p in rows:
         pid=int(p["productId"])
-        if pid not in set(ids.values()):continue
+        if pid not in wanted_ids:continue
         price=p.get("marketPrice")
         if not isinstance(price,(int,float)) or not math.isfinite(price) or price<0:continue
         all_prices.setdefault(pid,[]).append(p)
