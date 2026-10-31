@@ -39,6 +39,7 @@ def source_variant(name):
     return "NORMAL"
 def clean_name(name):
     name=re.sub(r"\((?:super )?(?:alternate|alt) art(?:\s*[12])?\)","",str(name),flags=re.I)
+    name=re.sub(r"\b(?:FB|FS)\d{2}-\d{1,3}\b","",name,flags=re.I)
     return norm(name)
 def number_of(p):
     ext=p.get("extendedData") or []
@@ -51,6 +52,11 @@ def number_of(p):
         m=re.search(r"\b(FB|FS)\d{2}-\d{1,3}\b",str(value or ""),re.I)
         if m:return m.group().upper()
     return None
+def same_number(product_number,local_number):
+    if not product_number:return False
+    m=re.search(r"(FB|FS)(\d{2})-(\d+)",product_number,re.I)
+    n=re.search(r"(FB|FS)(\d{2})-(\d+)",local_number,re.I)
+    return bool(m and n and m.group(1).upper()==n.group(1).upper() and m.group(2)==n.group(2) and int(m.group(3))==int(n.group(3)))
 def run():
     catalog=json.loads(CATALOG.read_text())
     existing=json.loads(OUTPUT.read_text()) if OUTPUT.exists() else {"ids":{}}
@@ -95,7 +101,7 @@ def run():
             # App uses ALT-1 and ALT-2; stop if a nonstandard variant is encountered.
             if v not in ("NORMAL","ALT-1","ALT-2"):
                 statuses["unmatched"]+=1;checks.append({"id":key,"reason":"unknown_printing"});continue
-            exact=[p for p in products if number_of(p)==card["number"] and
+            exact=[p for p in products if same_number(number_of(p),card["number"]) and
                    clean_name(p.get("name"))==norm(card["name"]) and
                    source_variant(p.get("name"))==v]
             # Never guess between two product IDs, or infer a variant by sorting products.
