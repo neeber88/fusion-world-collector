@@ -50,6 +50,20 @@
       "date": "2026-10-30",
       "source": "PriceCharting ungraded sold-price estimate",
       "url": "https://www.pricecharting.com/game/dragon-ball-fusion-world-starter-deck-son-goku/god-kamehameha-alternate-art-fs01-16"
+    },
+    "FS01-04#ALT-1": {
+      "product_id": 541109,
+      "amount": 0.87,
+      "date": "2026-10-26",
+      "source": "ValueMyCard TCGplayer market reference",
+      "url": "https://valuemycard.com/card/541109-krillin-bonus-pack-alternate-art-dragon-ball-super-fusion-world-starter-deck-1-son-goku"
+    },
+    "FS04-04#ALT-1": {
+      "product_id": 541122,
+      "amount": 7.73,
+      "date": "2026-10-30",
+      "source": "ValueMyCard TCGplayer market reference",
+      "url": "https://valuemycard.com/card/541122-king-cold-bonus-pack-alternate-art-dragon-ball-super-fusion-world-starter-deck-4-frieza"
     }
   }
 }
