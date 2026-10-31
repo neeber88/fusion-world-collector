@@ -106,8 +106,7 @@ def run():
     duplicate={k:v for k,v in reverse.items() if len(v)>1}
     if duplicate:raise RuntimeError("Duplicate product ID assigned across variants: "+str(duplicate)[:500])
     if not ids:
-        REPORT.write_text(json.dumps({"sets":stats,"review":checks,"mapped":0,"review_count":len(checks)},indent=2)+"\
-")
+        REPORT.write_text(json.dumps({"sets":stats,"review":checks,"mapped":0,"review_count":len(checks)},indent=2)+"\n")
         raise RuntimeError("Zero IDs matched; refusing empty mapping")
     OUTPUT.write_text(json.dumps({"source":"TCGCSV / TCGplayer","updated_at":datetime.datetime.now(datetime.timezone.utc).isoformat(),"ids":dict(sorted(ids.items()))},indent=2)+"\n")
     REPORT.write_text(json.dumps({"sets":stats,"review":checks,"mapped":len(ids),"review_count":len(checks)},indent=2)+"\n")
