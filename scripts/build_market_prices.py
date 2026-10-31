@@ -26,27 +26,41 @@ for group in groups:
     for p in rows:
         pid=int(p["productId"])
         if pid not in wanted_ids:continue
-        price=p.get("marketPrice")
-        if not isinstance(price,(int,float)) or not math.isfinite(price) or price<0:continue
         all_prices.setdefault(pid,[]).append(p)
     time.sleep(.25)
 today=datetime.datetime.now(datetime.timezone.utc).date().isoformat()
 prices={};ambiguous=[]
+# Supplemental independent or cross-checked dated references; never re-date them.
+reference_file=ROOT/"price-references.json"
+references=json.loads(reference_file.read_text()).get("references",{}) if reference_file.exists() else {}
+def valid(n):
+    return type(n) in (int,float) and math.isfinite(n) and 0<n<1000000
 for cardid,pid in ids.items():
     variants=all_prices.get(pid,[])
-    distinct={(str(p.get("subTypeName","")).lower(),round(p["marketPrice"],2)):p for p in variants}
-    if len(distinct)!=1:
-        if len(distinct)>1:ambiguous.append({"id":cardid,"productId":pid,"subtypes":list(map(list,distinct))})
+    by_subtype={}
+    for p in variants:by_subtype.setdefault(str(p.get("subTypeName","")).lower(),[]).append(p)
+    if len(by_subtype)>1:
+        ambiguous.append({"id":cardid,"productId":pid,"subtypes":list(by_subtype)})
         continue
-    price=next(iter(distinct.values()))["marketPrice"]
-    prices[cardid]={"amount":round(price,2),"date":today,"product_id":pid,"url":f"https://www.tcgplayer.com/product/{pid}"}
+    chosen=next(iter(by_subtype.values()))[0] if len(by_subtype)==1 else None
+    url=f"https://www.tcgplayer.com/product/{pid}"
+    if chosen and valid(chosen.get("marketPrice")):
+        prices[cardid]={"amount":round(chosen["marketPrice"],2),"date":today,"product_id":pid,"url":url,"source":"TCGCSV / TCGplayer","price_type":"market"}
+        continue
+    ref=references.get(cardid)
+    if ref and int(ref.get("product_id",0))==pid and valid(ref.get("amount")) and ref.get("date") and ref.get("source") and str(ref.get("url","")).startswith("https://"):
+        prices[cardid]={"amount":round(ref["amount"],2),"date":ref["date"],"product_id":pid,"url":ref["url"],"source":ref["source"],"price_type":"dated_reference"}
+        continue
+    # Listing mid/low prices are not sale prices. Do not mix them into collection valuation.
 old_path=ROOT/"prices.json"
 if old_path.exists():
     old=json.loads(old_path.read_text())
     for key,value in old.get("prices",{}).items():
-        prices.setdefault(key,value)
+        if key in ids and isinstance(value,dict) and (not value.get("product_id") or value.get("product_id")==ids[key]):
+            # Existing undated prices are labelled historic, not refreshed market values.
+            prices.setdefault(key,{**value,"source":value.get("source","Previous import"),"price_type":value.get("price_type","historical")})
 if not prices:raise RuntimeError("No valid prices; refusing empty feed")
-result={"kind":"fusion-world-market-prices","schema_version":1,"updated_at":today,"prices":prices,"stats":{"matched_product_ids":len(ids),"priced":len(prices),"ambiguous_prices":len(ambiguous),"unpriced_verified":len(ids)-len([k for k in ids if k in prices])}}
+result={"kind":"fusion-world-market-prices","schema_version":1,"updated_at":today,"prices":prices,"stats":{"matched_product_ids":len(ids),"priced":len(prices),"ambiguous_prices":len(ambiguous),"unpriced_verified":len(ids)-len([k for k in ids if k in prices]),"references_used":sum(p.get("price_type")=="dated_reference" for p in prices.values())}}
 old_path.write_text(json.dumps(result,indent=2,ensure_ascii=False)+"\n")
 (ROOT/"tcgplayer-price-audit.json").write_text(json.dumps({"ambiguous":ambiguous,"missing":[k for k in ids if k not in prices]},indent=2)+"\n")
 print("Verified IDs:",len(ids),"Priced cards:",len(prices),"Ambiguous:",len(ambiguous))
