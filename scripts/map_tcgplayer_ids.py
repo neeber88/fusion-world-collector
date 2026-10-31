@@ -87,13 +87,22 @@ def run():
         code=entry["id"]; group_list=by_set.get(code,[])
         local=[c for c in catalog["cards"] if c["set"]==code]
         statuses={"matched":0,"already_known":0,"ambiguous":0,"unmatched":0,"set_not_found":0}
-        if len(group_list)!=1:
+        if code in ("PROMO","ENERGY"):
+            # Search each applicable source product group, not just one arbitrary group.
+            keyword="promo" if code=="PROMO" else "energy"
+            group_list=[g for g in groups if keyword in norm(g.get("name"))]
+        if not group_list:
             statuses["set_not_found"]=len(local);stats[code]=statuses
-            checks.extend({"id":c["id"],"reason":"set_not_unique","groups":len(group_list)} for c in local)
+            checks.extend({"id":c["id"],"reason":"set_not_found"} for c in local)
             continue
-        group=group_list[0]
-        products=get(f"{API}/{category_id}/{group['groupId']}/products")
-        print(code,"sample products:",[(p.get("name"),number_of(p),p.get("extendedData")) for p in products[:2]],flush=True)
+        if len(group_list)>1 and code not in ("PROMO","ENERGY"):
+            statuses["set_not_found"]=len(local);stats[code]=statuses
+            checks.extend({"id":c["id"],"reason":"set_ambiguous","groups":len(group_list)} for c in local)
+            continue
+        products=[]
+        for group in group_list:
+            products.extend(get(f"{API}/{category_id}/{group['groupId']}/products"))
+        print(code,"products searched",len(products),flush=True)
         for card in local:
             key=card["id"]
             if key in ids:
@@ -102,9 +111,16 @@ def run():
             # App uses ALT-1 and ALT-2; stop if a nonstandard variant is encountered.
             if v not in ("NORMAL","ALT-1","ALT-2"):
                 statuses["unmatched"]+=1;checks.append({"id":key,"reason":"unknown_printing"});continue
-            exact=[p for p in products if same_number(number_of(p),card["number"]) and
-                   clean_name(p.get("name"))==norm(card["name"]) and
-                   source_variant(p.get("name"))==v]
+            def matches_card(p):
+                pn=number_of(p)
+                if code in ("PROMO","ENERGY"):
+                    # Never map a promo or energy printing just by character name.
+                    # Match the printed identifier AND an explicit product-name match.
+                    raw_name=norm(p.get("name"))
+                    printed=norm(card["number"])
+                    return (printed in raw_name or (pn is not None and norm(pn)==printed)) and norm(card["name"]) in raw_name and source_variant(p.get("name"))==v
+                return same_number(pn,card["number"]) and clean_name(p.get("name"))==norm(card["name"]) and source_variant(p.get("name"))==v
+            exact=[p for p in products if matches_card(p)]
             # Never guess between two product IDs, or infer a variant by sorting products.
             unique={int(p["productId"]):p for p in exact}
             if len(unique)==1:
