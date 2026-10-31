@@ -73,6 +73,8 @@ def run():
             exact_title=bool(name and len(name)>5 and (label==name or label.endswith(" "+name)))
             if exact_code or exact_title:
                 by_set.setdefault(code,[]).append(group)
+    print("TCGCSV groups:", [(g["groupId"],g["name"],g.get("abbreviation")) for g in groups][:100], flush=True)
+    print("Matched groups by set:", {k:[g["name"] for g in v] for k,v in by_set.items()}, flush=True)
     stats={}
     for entry in catalog["sets"]:
         code=entry["id"]; group_list=by_set.get(code,[])
@@ -84,6 +86,7 @@ def run():
             continue
         group=group_list[0]
         products=get(f"{API}/{category_id}/{group['groupId']}/products")
+        print(code,"sample products:",[(p.get("name"),number_of(p),p.get("extendedData")) for p in products[:2]],flush=True)
         for card in local:
             key=card["id"]
             if key in ids:
