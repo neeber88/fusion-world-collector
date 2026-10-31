@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'scripts/map_tcgplayer_ids.py'
+      - 'scripts/build_market_prices.py'
   schedule:
     - cron: '30 5 * * *'
 permissions:
@@ -18,11 +19,12 @@ jobs:
           python-version: '3.12'
       - run: pip install requests
       - run: python scripts/map_tcgplayer_ids.py
+      - run: python scripts/build_market_prices.py
       - name: Save verified mappings and audit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tcgplayer-product-ids.json tcgplayer-mapping-report.json
+          git add tcgplayer-product-ids.json tcgplayer-mapping-report.json prices.json tcgplayer-price-audit.json
           if ! git diff --cached --quiet; then
             git commit -m "Refresh verified TCGplayer product IDs"
             git push
