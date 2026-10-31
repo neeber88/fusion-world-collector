@@ -486,11 +486,20 @@ function priceGapPanel(){
 }
 function valuePage(){
  const t=valueTotals();
- const top=cards.filter(c=>isOwned(c.id)&&unitPrice(c.id)!==null)
-  .sort((a,b)=>unitPrice(b.id)-unitPrice(a.id)||a.id.localeCompare(b.id)).slice(0,3);
+ const rankedCards=cards.filter(c=>isOwned(c.id)&&unitPrice(c.id)!==null)
+  .sort((a,b)=>unitPrice(b.id)-unitPrice(a.id)||a.id.localeCompare(b.id));
+ const top=rankedCards.slice(0,3);
+ const nextNine=rankedCards.slice(3,12);
  const topCards=top.map((c,i)=>`<button type="button" class="value-top-card" data-action="detail" data-id="${escapeHtml(c.id)}" aria-label="${escapeHtml(c.name)}: ${priceText(c.id)}">
  <span class="value-top-rank">${i+1}</span>
  ${cardImage(c)?`<img src="${escapeHtml(cardImage(c))}" alt="" loading="lazy" onerror="this.hidden=true">`:'<span class="value-top-placeholder">${escapeHtml(c.number)}</span>'}
+ <span class="value-top-name">${escapeHtml(c.name)}</span>
+ <span class="value-top-number">${escapeHtml(c.number)} · ${escapeHtml(variantLabel(c))}</span>
+ <strong class="value-top-price">${priceText(c.id)}</strong>
+ </button>`).join('');
+ const nextNineCards=nextNine.map((c,i)=>`<button type="button" class="value-top-card" data-action="detail" data-id="${escapeHtml(c.id)}" aria-label="${escapeHtml(c.name)}: ${priceText(c.id)}">
+ <span class="value-top-rank">${i+4}</span>
+ ${cardImage(c)?`<img src="${escapeHtml(cardImage(c))}" alt="" loading="lazy" onerror="this.hidden=true">`:`<span class="value-top-placeholder">${escapeHtml(c.number)}</span>`}
  <span class="value-top-name">${escapeHtml(c.name)}</span>
  <span class="value-top-number">${escapeHtml(c.number)} · ${escapeHtml(variantLabel(c))}</span>
  <strong class="value-top-price">${priceText(c.id)}</strong>
@@ -499,6 +508,8 @@ function valuePage(){
  return `<div class="page-heading"><div><span class="label">DEINE SAMMLUNG · USD</span><h1>Sammlungswert</h1></div></div>
  <section class="value-block panel value-top-section" aria-label="Deine drei wertvollsten Karten">
  <h2>Deine 3 wertvollsten Karten</h2><div class="value-top-row">${topCards||'<p class="small">Noch keine bepreisten Karten im Besitz.</p>'}</div></section>
+ <section class="value-block panel value-top-section" aria-label="Weitere neun wertvollste Karten">
+ <h2>Plätze 4–12 · Weitere 9 wertvollste Karten</h2><div class="value-top-row">${nextNineCards||'<p class="small">Noch keine weiteren bepreisten Karten im Besitz.</p>'}</div></section>
  <section class="value-block panel"><h2>Gesamtwert · ${t.totalCopies} Karten inklusive Dubletten</h2><strong class="value-amount">${money(t.total)}</strong>
  <div class="value-line"><span>Normale Karten (${t.normalCopies}×)</span><b>${money(t.normalAll)}</b></div>
  <div class="value-line"><span>ALT-Karten (${t.altCopies}×)</span><b>${money(t.altAll)}</b></div>
