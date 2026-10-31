@@ -77,7 +77,8 @@ def run():
             # TCGplayer often omits FBxx codes from expansion titles.
             exact_code=code.casefold() in (abbr,label.split())
             exact_title=bool(name and len(name)>5 and (label==name or label.endswith(" "+name)))
-            if exact_code or exact_title:
+            special=(code=="PROMO" and "fusion world promotion cards and packs" in label) or (code=="ENERGY" and "fusion world energy markers" in label)
+            if exact_code or exact_title or special:
                 by_set.setdefault(code,[]).append(group)
     print("TCGCSV groups:", [(g["groupId"],g["name"],g.get("abbreviation")) for g in groups][:100], flush=True)
     print("Matched groups by set:", {k:[g["name"] for g in v] for k,v in by_set.items()}, flush=True)
