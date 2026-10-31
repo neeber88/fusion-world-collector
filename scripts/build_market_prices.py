@@ -52,11 +52,21 @@ for cardid,pid in ids.items():
         prices[cardid]={"amount":round(ref["amount"],2),"date":ref["date"],"product_id":pid,"url":ref["url"],"source":ref["source"],"price_type":"dated_reference"}
         continue
     # Listing mid/low prices are not sale prices. Do not mix them into collection valuation.
+# Restore dated fallback values for catalogued cards without a newer feed price.
+historical_path=ROOT/"historical-prices.json"
+if historical_path.exists():
+    historical=json.loads(historical_path.read_text()).get("prices",{})
+    known_keys={c["id"] for c in catalog.get("cards",[])}
+    for key,item in historical.items():
+        if key not in known_keys or not isinstance(item,dict) or not valid(item.get("amount")):continue
+        expected=ids.get(key)
+        if expected and item.get("product_id") and int(item["product_id"])!=expected:continue
+        prices.setdefault(key,{**item,"source":item.get("source","2026-10-20 backup"),"price_type":"historical"})
 old_path=ROOT/"prices.json"
 if old_path.exists():
     old=json.loads(old_path.read_text())
     for key,value in old.get("prices",{}).items():
-        if key in ids and isinstance(value,dict) and (not value.get("product_id") or value.get("product_id")==ids[key]):
+        if key in {c["id"] for c in catalog.get("cards",[])} and isinstance(value,dict) and (not ids.get(key) or not value.get("product_id") or value.get("product_id")==ids[key]):
             # Existing undated prices are labelled historic, not refreshed market values.
             prices.setdefault(key,{**value,"source":value.get("source","Previous import"),"price_type":value.get("price_type","historical")})
 if not prices:raise RuntimeError("No valid prices; refusing empty feed")
