@@ -64,10 +64,14 @@ def run():
     by_set={}
     for group in groups:
         label=norm(group.get("name"))
+        abbr=norm(group.get("abbreviation"))
         for entry in catalog["sets"]:
             code=entry["id"]
-            # Do not match generic names: only unequivocally identifiable expansions.
-            if re.search(r"\b"+re.escape(code.lower())+r"\b",str(group.get("abbreviation","")+" "+group.get("name","")).lower()) or (len(norm(entry.get("name")).split())>=2 and norm(entry.get("name")) in label):
+            name=norm(entry.get("name"))
+            # TCGplayer often omits FBxx codes from expansion titles.
+            exact_code=code.casefold() in (abbr,label.split())
+            exact_title=bool(name and len(name)>5 and (label==name or label.endswith(" "+name)))
+            if exact_code or exact_title:
                 by_set.setdefault(code,[]).append(group)
     stats={}
     for entry in catalog["sets"]:
