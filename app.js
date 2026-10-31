@@ -171,7 +171,7 @@ function normalizePriceFeed(feed){
  if(Object.keys(feed.prices).length>30000)throw Error('Preisdatei zu groß');
  const incoming={},unknown=[],conflicts=[];const byProductId=productIdIndex();
  for(const [rawId,item] of Object.entries(feed.prices)){
-  const productId=Number(item?.tcgplayer_product_id||item?.product_id||item?.productId||(/^\\d+$/.test(rawId)?rawId:0));
+  const productId=Number(item?.tcgplayer_product_id||item?.product_id||item?.productId||(/^\d+$/.test(rawId)?rawId:0));
   const mapped=productId?byProductId.get(productId):null;
   // Product ID wins over ambiguous printed card numbers; reject contradictory matches.
   if(mapped&&cardById.has(rawId)&&mapped!==rawId){conflicts.push(rawId);continue}
@@ -181,7 +181,7 @@ function normalizePriceFeed(feed){
   if(expected&&productId&&expected!==productId){conflicts.push(rawId);continue}
   const val=typeof item==='number'?item:item?.amount;
   if(typeof val!=='number'||!Number.isFinite(val)||val<0||val>1000000)continue;
-  const url=typeof item==='object'&&item?.url&&/^https:\/\/(www\.)?tcgplayer\\.com\\//i.test(item.url)?item.url:'';
+  const url=typeof item==='object'&&item?.url&&/^https:\/\/(www\.)?tcgplayer\.com\//i.test(item.url)?item.url:'';
   incoming[id]={amount:Math.round(val*100)/100,date:String(item?.date||feed.updated_at||'').slice(0,10),source:'TCGplayer via TCGCSV',url,productId:productId||expected||null};
  }
  return{incoming,unknown,conflicts,date:String(feed.updated_at||'').slice(0,10),stats:feed.stats||{}};
