@@ -1,6 +1,9 @@
 name: Match TCGplayer product IDs
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/map_tcgplayer_ids.py'
   schedule:
     - cron: '30 5 * * *'
 permissions:
