@@ -584,4 +584,24 @@ async function init(){const loaded=await loadState()||{};state={...DEFAULT,...lo
 window.addEventListener('DOMContentLoaded',()=>init().catch(e=>{$('screen').innerHTML=`<div class="empty"><strong>App konnte nicht starten</strong><p>${escapeHtml(e.message)}</p></div>`;console.error(e)}));
 })();
 
+</script><script>
+// Refresh the installed PWA when it is opened again from the background.
+// This does not clear localStorage, IndexedDB or any user collection data.
+(function(){
+ let hiddenSince=null;
+ document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){hiddenSince=Date.now();return;}
+  if(hiddenSince!==null){
+   const away=Date.now()-hiddenSince;
+   hiddenSince=null;
+   if(away>1000 && navigator.onLine){window.location.reload();}
+  }
+ });
+ window.addEventListener('pageshow',event=>{
+  if(event.persisted && navigator.onLine) window.location.reload();
+ });
+ if('serviceWorker' in navigator){
+  navigator.serviceWorker.ready.then(reg=>reg.update()).catch(()=>{});
+ }
+})();
 </script></body></html>
