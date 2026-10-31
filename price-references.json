@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "description": "Dated manually verified supplementary price references. Never inferred or automatically re-dated; product ID must match.",
+  "references": {
+    "FB08-121#ALT-2": {
+      "product_id": 666774,
+      "amount": 1001.88,
+      "date": "2026-10-30",
+      "source": "TCGplayer market-price page (manual reference; unverified on 2026-10-31)",
+      "url": "https://www.tcgplayer.com/product/666774"
+    }
+  }
+}
