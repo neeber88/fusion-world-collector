@@ -1,46 +1,11 @@
 {
-  "total_unmatched": 1328,
+  "total_unmatched": 1320,
   "by_reason": {
-    "unmatched": 1076,
+    "unmatched": 1068,
     "unknown_printing": 112,
     "ambiguous": 140
   },
   "cards": [
-    {
-      "id": "FS01-02#ALT-1",
-      "reason": "unmatched",
-      "candidates": []
-    },
-    {
-      "id": "FS01-04#ALT-1",
-      "reason": "unmatched",
-      "candidates": []
-    },
-    {
-      "id": "FS01-05#ALT-1",
-      "reason": "unmatched",
-      "candidates": []
-    },
-    {
-      "id": "FS01-08#ALT-1",
-      "reason": "unmatched",
-      "candidates": []
-    },
-    {
-      "id": "FS01-09#ALT-1",
-      "reason": "unmatched",
-      "candidates": []
-    },
-    {
-      "id": "FS01-15#ALT-1",
-      "reason": "unmatched",
-      "candidates": []
-    },
-    {
-      "id": "FS01-16#ALT-1",
-      "reason": "unmatched",
-      "candidates": []
-    },
     {
       "id": "FS02-03#ALT-1",
       "reason": "unmatched",
@@ -118,11 +83,6 @@
     },
     {
       "id": "FS04-03#ALT-1",
-      "reason": "unmatched",
-      "candidates": []
-    },
-    {
-      "id": "FS04-04#ALT-1",
       "reason": "unmatched",
       "candidates": []
     },

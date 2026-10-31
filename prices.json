@@ -204,7 +204,7 @@
       "price_type": "market"
     },
     "E-139#BASE": {
-      "amount": 32,
+      "amount": 32.0,
       "date": "2026-10-31",
       "product_id": 684121,
       "url": "https://www.tcgplayer.com/product/684121",
@@ -1244,7 +1244,7 @@
       "price_type": "market"
     },
     "FB01-105#ALT-1": {
-      "amount": 25,
+      "amount": 25.0,
       "date": "2026-10-31",
       "product_id": 539424,
       "url": "https://www.tcgplayer.com/product/539424",
@@ -1988,7 +1988,7 @@
       "price_type": "market"
     },
     "FB02-044#ALT-1": {
-      "amount": 5,
+      "amount": 5.0,
       "date": "2026-10-31",
       "product_id": 547656,
       "url": "https://www.tcgplayer.com/product/547656",
@@ -2468,7 +2468,7 @@
       "price_type": "market"
     },
     "FB02-098#BASE": {
-      "amount": 2,
+      "amount": 2.0,
       "date": "2026-10-31",
       "product_id": 548277,
       "url": "https://www.tcgplayer.com/product/548277",
@@ -2836,7 +2836,7 @@
       "price_type": "market"
     },
     "FB02-139#ALT-2": {
-      "amount": 722,
+      "amount": 722.0,
       "date": "2026-10-31",
       "product_id": 548173,
       "url": "https://www.tcgplayer.com/product/548173",
@@ -5748,7 +5748,7 @@
       "price_type": "market"
     },
     "FB05-038#ALT-1": {
-      "amount": 12,
+      "amount": 12.0,
       "date": "2026-10-31",
       "product_id": 614319,
       "url": "https://www.tcgplayer.com/product/614319",
@@ -7940,7 +7940,7 @@
       "price_type": "market"
     },
     "FB07-030#ALT-1": {
-      "amount": 11,
+      "amount": 11.0,
       "date": "2026-10-31",
       "product_id": 651170,
       "url": "https://www.tcgplayer.com/product/651170",
@@ -8748,7 +8748,7 @@
       "price_type": "market"
     },
     "FB07-113#ALT-1": {
-      "amount": 346,
+      "amount": 346.0,
       "date": "2026-10-31",
       "product_id": 646933,
       "url": "https://www.tcgplayer.com/product/646933",
@@ -10100,7 +10100,7 @@
       "price_type": "market"
     },
     "FB09-001#ALT-2": {
-      "amount": 1418,
+      "amount": 1418.0,
       "date": "2026-10-31",
       "product_id": 677549,
       "url": "https://www.tcgplayer.com/product/677549",
@@ -10476,7 +10476,7 @@
       "price_type": "market"
     },
     "FB09-037#BASE": {
-      "amount": 2,
+      "amount": 2.0,
       "date": "2026-10-31",
       "product_id": 682031,
       "url": "https://www.tcgplayer.com/product/682031",
@@ -10588,7 +10588,7 @@
       "price_type": "market"
     },
     "FB09-049#ALT-1": {
-      "amount": 138,
+      "amount": 138.0,
       "date": "2026-10-31",
       "product_id": 677544,
       "url": "https://www.tcgplayer.com/product/677544",
@@ -11340,7 +11340,7 @@
       "price_type": "market"
     },
     "FB09-122#BASE": {
-      "amount": 24,
+      "amount": 24.0,
       "date": "2026-10-31",
       "product_id": 682124,
       "url": "https://www.tcgplayer.com/product/682124",
@@ -11900,7 +11900,7 @@
       "price_type": "market"
     },
     "FB10-057#ALT-1": {
-      "amount": 24,
+      "amount": 24.0,
       "date": "2026-10-31",
       "product_id": 695773,
       "url": "https://www.tcgplayer.com/product/695773",
@@ -14171,6 +14171,14 @@
       "source": "TCGCSV / TCGplayer",
       "price_type": "market"
     },
+    "FS01-02#ALT-1": {
+      "amount": 3.0,
+      "date": "2026-10-31",
+      "product_id": 541106,
+      "url": "https://www.tcgplayer.com/product/541106",
+      "source": "TCGCSV / TCGplayer",
+      "price_type": "market"
+    },
     "FS01-02#BASE": {
       "amount": 0.18,
       "date": "2026-10-31",
@@ -14187,11 +14195,27 @@
       "source": "TCGCSV / TCGplayer",
       "price_type": "market"
     },
+    "FS01-04#ALT-1": {
+      "amount": 0.87,
+      "date": "2026-10-31",
+      "product_id": 541109,
+      "url": "https://www.tcgplayer.com/product/541109",
+      "source": "TCGCSV / TCGplayer",
+      "price_type": "market"
+    },
     "FS01-04#BASE": {
       "amount": 0.25,
       "date": "2026-10-31",
       "product_id": 535907,
       "url": "https://www.tcgplayer.com/product/535907",
+      "source": "TCGCSV / TCGplayer",
+      "price_type": "market"
+    },
+    "FS01-05#ALT-1": {
+      "amount": 0.65,
+      "date": "2026-10-31",
+      "product_id": 541110,
+      "url": "https://www.tcgplayer.com/product/541110",
       "source": "TCGCSV / TCGplayer",
       "price_type": "market"
     },
@@ -14219,11 +14243,27 @@
       "source": "TCGCSV / TCGplayer",
       "price_type": "market"
     },
+    "FS01-08#ALT-1": {
+      "amount": 8.71,
+      "date": "2026-10-31",
+      "product_id": 541107,
+      "url": "https://www.tcgplayer.com/product/541107",
+      "source": "TCGCSV / TCGplayer",
+      "price_type": "market"
+    },
     "FS01-08#BASE": {
       "amount": 0.53,
       "date": "2026-10-31",
       "product_id": 535910,
       "url": "https://www.tcgplayer.com/product/535910",
+      "source": "TCGCSV / TCGplayer",
+      "price_type": "market"
+    },
+    "FS01-09#ALT-1": {
+      "amount": 4.76,
+      "date": "2026-10-31",
+      "product_id": 541108,
+      "url": "https://www.tcgplayer.com/product/541108",
       "source": "TCGCSV / TCGplayer",
       "price_type": "market"
     },
@@ -14275,11 +14315,27 @@
       "source": "TCGCSV / TCGplayer",
       "price_type": "market"
     },
+    "FS01-15#ALT-1": {
+      "amount": 13.41,
+      "date": "2026-10-31",
+      "product_id": 541111,
+      "url": "https://www.tcgplayer.com/product/541111",
+      "source": "TCGCSV / TCGplayer",
+      "price_type": "market"
+    },
     "FS01-15#BASE": {
       "amount": 8.06,
       "date": "2026-10-31",
       "product_id": 535915,
       "url": "https://www.tcgplayer.com/product/535915",
+      "source": "TCGCSV / TCGplayer",
+      "price_type": "market"
+    },
+    "FS01-16#ALT-1": {
+      "amount": 8.08,
+      "date": "2026-10-31",
+      "product_id": 541112,
+      "url": "https://www.tcgplayer.com/product/541112",
       "source": "TCGCSV / TCGplayer",
       "price_type": "market"
     },
@@ -14568,6 +14624,14 @@
       "date": "2026-10-31",
       "product_id": 536599,
       "url": "https://www.tcgplayer.com/product/536599",
+      "source": "TCGCSV / TCGplayer",
+      "price_type": "market"
+    },
+    "FS04-04#ALT-1": {
+      "amount": 7.73,
+      "date": "2026-10-31",
+      "product_id": 541122,
+      "url": "https://www.tcgplayer.com/product/541122",
       "source": "TCGCSV / TCGplayer",
       "price_type": "market"
     },
@@ -15674,70 +15738,6 @@
       "url": "https://www.tcgplayer.com/product/681593",
       "source": "TCGCSV / TCGplayer",
       "price_type": "market"
-    },
-    "FS01-02#ALT-1": {
-      "amount": 2.88,
-      "date": "2026-10-30",
-      "product_id": 541106,
-      "url": "https://www.pricecharting.com/game/dragon-ball-fusion-world-starter-deck-son-goku/whis-alternate-art-fs01-02",
-      "source": "PriceCharting ungraded sold-price estimate",
-      "price_type": "dated_reference"
-    },
-    "FS01-05#ALT-1": {
-      "amount": 1.57,
-      "date": "2026-10-30",
-      "product_id": 541110,
-      "url": "https://www.pricecharting.com/game/dragon-ball-fusion-world-starter-deck-son-goku/shin-alternate-art-fs01-05",
-      "source": "PriceCharting ungraded sold-price estimate",
-      "price_type": "dated_reference"
-    },
-    "FS01-08#ALT-1": {
-      "amount": 7.56,
-      "date": "2026-10-30",
-      "product_id": 541107,
-      "url": "https://www.pricecharting.com/game/dragon-ball-fusion-world-starter-deck-son-goku/son-goku-alternate-art-fs01-08",
-      "source": "PriceCharting ungraded sold-price estimate",
-      "price_type": "dated_reference"
-    },
-    "FS01-09#ALT-1": {
-      "amount": 4.31,
-      "date": "2026-10-30",
-      "product_id": 541108,
-      "url": "https://www.pricecharting.com/game/dragon-ball-fusion-world-starter-deck-son-goku/son-gohan-adolescence-alternate-art-fs01-09",
-      "source": "PriceCharting ungraded sold-price estimate",
-      "price_type": "dated_reference"
-    },
-    "FS01-15#ALT-1": {
-      "amount": 10.14,
-      "date": "2026-10-30",
-      "product_id": 541111,
-      "url": "https://www.pricecharting.com/game/dragon-ball-fusion-world-starter-deck-son-goku/kamehameha-bonus-pack-alternate-art-fs01-15",
-      "source": "PriceCharting ungraded sold-price estimate",
-      "price_type": "dated_reference"
-    },
-    "FS01-16#ALT-1": {
-      "amount": 8.94,
-      "date": "2026-10-30",
-      "product_id": 541112,
-      "url": "https://www.pricecharting.com/game/dragon-ball-fusion-world-starter-deck-son-goku/god-kamehameha-alternate-art-fs01-16",
-      "source": "PriceCharting ungraded sold-price estimate",
-      "price_type": "dated_reference"
-    },
-    "FS01-04#ALT-1": {
-      "amount": 0.87,
-      "date": "2026-10-26",
-      "product_id": 541109,
-      "url": "https://valuemycard.com/card/541109-krillin-bonus-pack-alternate-art-dragon-ball-super-fusion-world-starter-deck-1-son-goku",
-      "source": "ValueMyCard TCGplayer market reference",
-      "price_type": "dated_reference"
-    },
-    "FS04-04#ALT-1": {
-      "amount": 7.73,
-      "date": "2026-10-30",
-      "product_id": 541122,
-      "url": "https://valuemycard.com/card/541122-king-cold-bonus-pack-alternate-art-dragon-ball-super-fusion-world-starter-deck-4-frieza",
-      "source": "ValueMyCard TCGplayer market reference",
-      "price_type": "dated_reference"
     },
     "FB11-073#ALT-1": {
       "amount": 121.4,
@@ -19445,11 +19445,10 @@
     }
   },
   "stats": {
-    "matched_product_ids": 1990,
+    "matched_product_ids": 1998,
     "priced": 2430,
     "ambiguous_prices": 0,
-    "unpriced_verified": 31,
-    "references_used": 1,
-    "historical_fallbacks": 463
+    "unpriced_verified": 29,
+    "references_used": 1
   }
 }

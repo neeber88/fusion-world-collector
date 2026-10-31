@@ -2,9 +2,9 @@
   "sets": {
     "FS01": {
       "matched": 0,
-      "already_known": 16,
+      "already_known": 23,
       "ambiguous": 0,
-      "unmatched": 7,
+      "unmatched": 0,
       "set_not_found": 0
     },
     "FS02": {
@@ -23,9 +23,9 @@
     },
     "FS04": {
       "matched": 0,
-      "already_known": 16,
+      "already_known": 17,
       "ambiguous": 0,
-      "unmatched": 7,
+      "unmatched": 6,
       "set_not_found": 0
     },
     "FS05": {
@@ -183,56 +183,21 @@
       "set_not_found": 0
     },
     "PROMO": {
-      "matched": 51,
-      "already_known": 0,
+      "matched": 0,
+      "already_known": 51,
       "ambiguous": 32,
       "unmatched": 482,
       "set_not_found": 0
     },
     "ENERGY": {
-      "matched": 50,
-      "already_known": 0,
+      "matched": 0,
+      "already_known": 50,
       "ambiguous": 107,
       "unmatched": 111,
       "set_not_found": 0
     }
   },
   "review": [
-    {
-      "id": "FS01-02#ALT-1",
-      "reason": "unmatched",
-      "candidates": []
-    },
-    {
-      "id": "FS01-04#ALT-1",
-      "reason": "unmatched",
-      "candidates": []
-    },
-    {
-      "id": "FS01-05#ALT-1",
-      "reason": "unmatched",
-      "candidates": []
-    },
-    {
-      "id": "FS01-08#ALT-1",
-      "reason": "unmatched",
-      "candidates": []
-    },
-    {
-      "id": "FS01-09#ALT-1",
-      "reason": "unmatched",
-      "candidates": []
-    },
-    {
-      "id": "FS01-15#ALT-1",
-      "reason": "unmatched",
-      "candidates": []
-    },
-    {
-      "id": "FS01-16#ALT-1",
-      "reason": "unmatched",
-      "candidates": []
-    },
     {
       "id": "FS02-03#ALT-1",
       "reason": "unmatched",
@@ -310,11 +275,6 @@
     },
     {
       "id": "FS04-03#ALT-1",
-      "reason": "unmatched",
-      "candidates": []
-    },
-    {
-      "id": "FS04-04#ALT-1",
       "reason": "unmatched",
       "candidates": []
     },
@@ -7250,6 +7210,6 @@
       "candidates": []
     }
   ],
-  "mapped": 1990,
-  "review_count": 1328
+  "mapped": 1998,
+  "review_count": 1320
 }
