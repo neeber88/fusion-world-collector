@@ -724,7 +724,7 @@
       "url": "https://www.tcgplayer.com/product/536930"
     },
     "FB01-105#ALT-1": {
-      "amount": 25.0,
+      "amount": 25,
       "date": "2026-10-31",
       "product_id": 539424,
       "url": "https://www.tcgplayer.com/product/539424"
@@ -1276,7 +1276,7 @@
       "url": "https://www.tcgplayer.com/product/543850"
     },
     "FB02-044#ALT-1": {
-      "amount": 5.0,
+      "amount": 5,
       "date": "2026-10-31",
       "product_id": 547656,
       "url": "https://www.tcgplayer.com/product/547656"
@@ -1636,7 +1636,7 @@
       "url": "https://www.tcgplayer.com/product/548276"
     },
     "FB02-098#BASE": {
-      "amount": 2.0,
+      "amount": 2,
       "date": "2026-10-31",
       "product_id": 548277,
       "url": "https://www.tcgplayer.com/product/548277"
@@ -1912,7 +1912,7 @@
       "url": "https://www.tcgplayer.com/product/547790"
     },
     "FB02-139#ALT-2": {
-      "amount": 722.0,
+      "amount": 722,
       "date": "2026-10-31",
       "product_id": 548173,
       "url": "https://www.tcgplayer.com/product/548173"
@@ -4048,7 +4048,7 @@
       "url": "https://www.tcgplayer.com/product/615475"
     },
     "FB05-038#ALT-1": {
-      "amount": 12.0,
+      "amount": 12,
       "date": "2026-10-31",
       "product_id": 614319,
       "url": "https://www.tcgplayer.com/product/614319"
@@ -5686,7 +5686,7 @@
       "url": "https://www.tcgplayer.com/product/647079"
     },
     "FB07-030#ALT-1": {
-      "amount": 11.0,
+      "amount": 11,
       "date": "2026-10-31",
       "product_id": 651170,
       "url": "https://www.tcgplayer.com/product/651170"
@@ -6292,7 +6292,7 @@
       "url": "https://www.tcgplayer.com/product/650309"
     },
     "FB07-113#ALT-1": {
-      "amount": 346.0,
+      "amount": 346,
       "date": "2026-10-31",
       "product_id": 646933,
       "url": "https://www.tcgplayer.com/product/646933"
@@ -7300,7 +7300,7 @@
       "url": "https://www.tcgplayer.com/product/677542"
     },
     "FB09-001#ALT-2": {
-      "amount": 1418.0,
+      "amount": 1418,
       "date": "2026-10-31",
       "product_id": 677549,
       "url": "https://www.tcgplayer.com/product/677549"
@@ -7582,7 +7582,7 @@
       "url": "https://www.tcgplayer.com/product/682032"
     },
     "FB09-037#BASE": {
-      "amount": 2.0,
+      "amount": 2,
       "date": "2026-10-31",
       "product_id": 682031,
       "url": "https://www.tcgplayer.com/product/682031"
@@ -7666,7 +7666,7 @@
       "url": "https://www.tcgplayer.com/product/677386"
     },
     "FB09-049#ALT-1": {
-      "amount": 138.0,
+      "amount": 138,
       "date": "2026-10-31",
       "product_id": 677544,
       "url": "https://www.tcgplayer.com/product/677544"
@@ -8230,7 +8230,7 @@
       "url": "https://www.tcgplayer.com/product/682125"
     },
     "FB09-122#BASE": {
-      "amount": 24.0,
+      "amount": 24,
       "date": "2026-10-31",
       "product_id": 682124,
       "url": "https://www.tcgplayer.com/product/682124"
@@ -8650,7 +8650,7 @@
       "url": "https://www.tcgplayer.com/product/694990"
     },
     "FB10-057#ALT-1": {
-      "amount": 24.0,
+      "amount": 24,
       "date": "2026-10-31",
       "product_id": 695773,
       "url": "https://www.tcgplayer.com/product/695773"
@@ -11234,12 +11234,21 @@
       "date": "2026-10-31",
       "product_id": 681593,
       "url": "https://www.tcgplayer.com/product/681593"
+    },
+    "FB08-121#ALT-2": {
+      "amount": 1001.88,
+      "date": "2026-10-30",
+      "product_id": 666774,
+      "url": "https://www.tcgplayer.com/product/666774",
+      "source": "TCGplayer (datierte Referenz)",
+      "price_type": "dated_reference"
     }
   },
   "stats": {
     "matched_product_ids": 1889,
-    "priced": 1872,
+    "priced": 1873,
     "ambiguous_prices": 0,
-    "unpriced_verified": 17
+    "unpriced_verified": 16,
+    "references_used": 1
   }
 }
