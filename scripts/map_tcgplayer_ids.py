@@ -115,6 +115,16 @@ def run():
                 statuses[reason]+=1
                 checks.append({"id":key,"reason":reason,"candidates":list(unique)})
         stats[code]=statuses
+    # Every unresolved variant gets an individually evaluated audit entry.
+    # Candidate IDs are suggestions ONLY and never silently assigned.
+    reason_counts={}
+    for item in checks:
+        reason_counts[item["reason"]]=reason_counts.get(item["reason"],0)+1
+    (ROOT/"tcgplayer-unmatched-summary.json").write_text(json.dumps({
+        "total_unmatched":len(checks),
+        "by_reason":reason_counts,
+        "cards":checks
+    },indent=2)+"\n")
     reverse={}
     for k,v in ids.items():reverse.setdefault(str(v),[]).append(k)
     duplicate={k:v for k,v in reverse.items() if len(v)>1}
