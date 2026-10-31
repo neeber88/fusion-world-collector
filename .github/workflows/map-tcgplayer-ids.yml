@@ -5,6 +5,7 @@ on:
     paths:
       - 'scripts/map_tcgplayer_ids.py'
       - 'scripts/build_market_prices.py'
+      - 'price-references.json'
   schedule:
     - cron: '30 5 * * *'
 permissions:
