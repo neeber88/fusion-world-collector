@@ -8,6 +8,48 @@
       "date": "2026-10-30",
       "source": "TCGplayer market-price page (manual reference; unverified on 2026-10-31)",
       "url": "https://www.tcgplayer.com/product/666774"
+    },
+    "FS01-02#ALT-1": {
+      "product_id": 541106,
+      "amount": 2.88,
+      "date": "2026-10-30",
+      "source": "PriceCharting ungraded sold-price estimate",
+      "url": "https://www.pricecharting.com/game/dragon-ball-fusion-world-starter-deck-son-goku/whis-alternate-art-fs01-02"
+    },
+    "FS01-05#ALT-1": {
+      "product_id": 541110,
+      "amount": 1.57,
+      "date": "2026-10-30",
+      "source": "PriceCharting ungraded sold-price estimate",
+      "url": "https://www.pricecharting.com/game/dragon-ball-fusion-world-starter-deck-son-goku/shin-alternate-art-fs01-05"
+    },
+    "FS01-08#ALT-1": {
+      "product_id": 541107,
+      "amount": 7.56,
+      "date": "2026-10-30",
+      "source": "PriceCharting ungraded sold-price estimate",
+      "url": "https://www.pricecharting.com/game/dragon-ball-fusion-world-starter-deck-son-goku/son-goku-alternate-art-fs01-08"
+    },
+    "FS01-09#ALT-1": {
+      "product_id": 541108,
+      "amount": 4.31,
+      "date": "2026-10-30",
+      "source": "PriceCharting ungraded sold-price estimate",
+      "url": "https://www.pricecharting.com/game/dragon-ball-fusion-world-starter-deck-son-goku/son-gohan-adolescence-alternate-art-fs01-09"
+    },
+    "FS01-15#ALT-1": {
+      "product_id": 541111,
+      "amount": 10.14,
+      "date": "2026-10-30",
+      "source": "PriceCharting ungraded sold-price estimate",
+      "url": "https://www.pricecharting.com/game/dragon-ball-fusion-world-starter-deck-son-goku/kamehameha-bonus-pack-alternate-art-fs01-15"
+    },
+    "FS01-16#ALT-1": {
+      "product_id": 541112,
+      "amount": 8.94,
+      "date": "2026-10-30",
+      "source": "PriceCharting ungraded sold-price estimate",
+      "url": "https://www.pricecharting.com/game/dragon-ball-fusion-world-starter-deck-son-goku/god-kamehameha-alternate-art-fs01-16"
     }
   }
 }
