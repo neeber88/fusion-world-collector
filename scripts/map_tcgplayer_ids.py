@@ -45,10 +45,10 @@ def number_of(p):
     if isinstance(ext,dict):ext=[{"name":k,"value":v} for k,v in ext.items()]
     for x in ext:
         if norm(x.get("name")) in ("number","card number","cardnumber","number in set"):
-            m=re.search(r"\b(FB|FS)\d{2}-\d{3}\b",str(x.get("value")),re.I)
+            m=re.search(r"\b(FB|FS)\d{2}-\d{1,3}\b",str(x.get("value")),re.I)
             if m:return m.group().upper()
     for value in [p.get("name"),p.get("cleanName")]:
-        m=re.search(r"\b(FB|FS)\d{2}-\d{3}\b",str(value or ""),re.I)
+        m=re.search(r"\b(FB|FS)\d{2}-\d{1,3}\b",str(value or ""),re.I)
         if m:return m.group().upper()
     return None
 def run():
@@ -84,7 +84,7 @@ def run():
             key=card["id"]
             if key in ids:
                 statuses["already_known"]+=1;continue
-            v="NORMAL" if card["variant"]=="NORMAL" else ("ALT-"+str(card["variant"]).split("-")[-1] if "ALT" in card["variant"] else str(card["variant"]).upper())
+            v="NORMAL" if card["variant"] in ("NORMAL","BASE") else ("ALT-"+str(card["variant"]).split("-")[-1] if "ALT" in card["variant"] else str(card["variant"]).upper())
             # App uses ALT-1 and ALT-2; stop if a nonstandard variant is encountered.
             if v not in ("NORMAL","ALT-1","ALT-2"):
                 statuses["unmatched"]+=1;checks.append({"id":key,"reason":"unknown_printing"});continue
@@ -105,6 +105,10 @@ def run():
     for k,v in ids.items():reverse.setdefault(str(v),[]).append(k)
     duplicate={k:v for k,v in reverse.items() if len(v)>1}
     if duplicate:raise RuntimeError("Duplicate product ID assigned across variants: "+str(duplicate)[:500])
+    if not ids:
+        REPORT.write_text(json.dumps({"sets":stats,"review":checks,"mapped":0,"review_count":len(checks)},indent=2)+"\
+")
+        raise RuntimeError("Zero IDs matched; refusing empty mapping")
     OUTPUT.write_text(json.dumps({"source":"TCGCSV / TCGplayer","updated_at":datetime.datetime.now(datetime.timezone.utc).isoformat(),"ids":dict(sorted(ids.items()))},indent=2)+"\n")
     REPORT.write_text(json.dumps({"sets":stats,"review":checks,"mapped":len(ids),"review_count":len(checks)},indent=2)+"\n")
     print(f"Verified product IDs: {len(ids)}; review required: {len(checks)}")
