@@ -67,7 +67,7 @@ def run():
         for entry in catalog["sets"]:
             code=entry["id"]
             # Do not match generic names: only unequivocally identifiable expansions.
-            if code.lower() in str(group.get("abbreviation","")).lower() or re.search(r"\b"+re.escape(code.lower())+r"\b",str(group.get("name","")).lower()):
+            if re.search(r"\b"+re.escape(code.lower())+r"\b",str(group.get("abbreviation","")+" "+group.get("name","")).lower()) or (len(norm(entry.get("name")).split())>=2 and norm(entry.get("name")) in label):
                 by_set.setdefault(code,[]).append(group)
     stats={}
     for entry in catalog["sets"]:
@@ -84,7 +84,7 @@ def run():
             key=card["id"]
             if key in ids:
                 statuses["already_known"]+=1;continue
-            v="NORMAL" if card["variant"]=="NORMAL" else str(card["variant"]).replace("#","").upper()
+            v="NORMAL" if card["variant"]=="NORMAL" else ("ALT-"+str(card["variant"]).split("-")[-1] if "ALT" in card["variant"] else str(card["variant"]).upper())
             # App uses ALT-1 and ALT-2; stop if a nonstandard variant is encountered.
             if v not in ("NORMAL","ALT-1","ALT-2"):
                 statuses["unmatched"]+=1;checks.append({"id":key,"reason":"unknown_printing"});continue
