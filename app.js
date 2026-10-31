@@ -161,20 +161,32 @@ function fileInput(accept,callback){const input=$('fileInput');input.value='';in
 function downloadJson(name,obj){const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000)}
 function doBackup(){const now=new Date().toISOString();const backup={kind:'fusion-world-collector-backup',schema_version:1,created_at:now,quantities:state.quantities,prices:state.prices,marketPrices:state.marketPrices,marketPriceUpdated:state.marketPriceUpdated,marketPriceUrl:state.marketPriceUrl,marketPriceChecked:state.marketPriceChecked,marketPriceStats:state.marketPriceStats,imageOverrides:state.imageOverrides,purchases:state.purchases,gridColumns:state.gridColumns,ownedIds:state.ownedIds,favorites:state.favorites,localCards:state.localCards,unbackedAdds:[],catalogSnapshot:catalog,preimport:state.preimport};downloadJson(`Fusion_World_Backup_${now.slice(0,10)}.json`,backup);state.lastBackup=now;state.unbackedAdds=[];save();render();notify('Backup-Download gestartet')}
 async function backupImport(data){if(data.kind!=='fusion-world-collector-backup'||data.schema_version!==1||!Array.isArray(data.ownedIds)||!Array.isArray(data.favorites))throw Error('Kein kompatibles Fusion-World-Backup');if(data.ownedIds.some(id=>typeof id!=='string')||data.favorites.some(id=>typeof id!=='string'))throw Error('Falsche Karten-IDs');let c=data.catalogSnapshot?normalizeCatalog(data.catalogSnapshot):null;if(!confirm(`Backup vom ${data.created_at||'unbekannt'} importieren? Deine aktuellen Haken und die Wunschliste werden ersetzt.`))return;const extra=normalizeExtras(data);Object.assign(state,extra);state.marketPrices=normalizeMarketPrices(data.marketPrices);state.marketPriceUpdated=String(data.marketPriceUpdated||'');state.marketPriceUrl=String(data.marketPriceUrl||'');state.marketPriceChecked=String(data.marketPriceChecked||'');state.marketPriceStats=data.marketPriceStats&&typeof data.marketPriceStats==='object'?data.marketPriceStats:{};state.ownedIds=unique(data.ownedIds);state.favorites=unique(data.favorites);state.localCards=Array.isArray(data.localCards)?data.localCards:[];state.catalogOverride=c?{...c,cards:c.cards.filter(item=>!window.FW_CATALOG.cards.some(current=>current.id===item.id))}:state.catalogOverride;state.preimport=Array.isArray(data.preimport)?data.preimport:[];state.unbackedAdds=[];state.lastBackup=data.created_at||new Date().toISOString();state.seedApplied=true;rebuild();save();render();notify('Backup importiert – Sammlung wiederhergestellt')}
+// Explicit TCGplayer product IDs are edition-specific. Never infer IDs from printed card numbers.
+// Expand this verified mapping as the source feed supplies validated IDs for other sets.
+const TCGPLAYER_PRODUCT_IDS=Object.freeze({'FB08-121#ALT-2':666774});
+function tcgProductId(card){return Number(card?.tcgplayer_product_id||TCGPLAYER_PRODUCT_IDS[card?.id])||null}
+function productIdIndex(){const index=new Map(),ambiguous=new Set();for(const c of cards){const id=tcgProductId(c);if(!id)continue;if(index.has(id)){ambiguous.add(id);continue}index.set(id,c.id)}for(const id of ambiguous)index.delete(id);return index}
 function normalizePriceFeed(feed){
  if(!feed||feed.kind!=='fusion-world-market-prices'||feed.schema_version!==1||!feed.prices||Array.isArray(feed.prices)||typeof feed.prices!=='object')throw Error('Keine kompatible Fusion-World-Preisdatei');
  if(Object.keys(feed.prices).length>30000)throw Error('Preisdatei zu groß');
- const incoming={},unknown=[];
- for(const [id,item] of Object.entries(feed.prices)){
-  if(!cardById.has(id)){unknown.push(id);continue}
+ const incoming={},unknown=[],conflicts=[];const byProductId=productIdIndex();
+ for(const [rawId,item] of Object.entries(feed.prices)){
+  const productId=Number(item?.tcgplayer_product_id||item?.product_id||item?.productId||(/^\\d+$/.test(rawId)?rawId:0));
+  const mapped=productId?byProductId.get(productId):null;
+  // Product ID wins over ambiguous printed card numbers; reject contradictory matches.
+  if(mapped&&cardById.has(rawId)&&mapped!==rawId){conflicts.push(rawId);continue}
+  const id=mapped||(cardById.has(rawId)?rawId:null);
+  if(!id){unknown.push(rawId);continue}
+  const expected=tcgProductId(cardById.get(id));
+  if(expected&&productId&&expected!==productId){conflicts.push(rawId);continue}
   const val=typeof item==='number'?item:item?.amount;
   if(typeof val!=='number'||!Number.isFinite(val)||val<0||val>1000000)continue;
-  const url=typeof item==='object'&&item?.url&&/^https:\/\/(www\.)?tcgplayer\.com\//i.test(item.url)?item.url:'';
-  incoming[id]={amount:Math.round(val*100)/100,date:String(item?.date||feed.updated_at||'').slice(0,10),source:'TCGplayer via TCGCSV',url};
+  const url=typeof item==='object'&&item?.url&&/^https:\/\/(www\.)?tcgplayer\\.com\\//i.test(item.url)?item.url:'';
+  incoming[id]={amount:Math.round(val*100)/100,date:String(item?.date||feed.updated_at||'').slice(0,10),source:'TCGplayer via TCGCSV',url,productId:productId||expected||null};
  }
- return{incoming,unknown,date:String(feed.updated_at||'').slice(0,10),stats:feed.stats||{}};
+ return{incoming,unknown,conflicts,date:String(feed.updated_at||'').slice(0,10),stats:feed.stats||{}};
 }
-function ingestPrices(feed){const v=normalizePriceFeed(feed),previous=Object.keys(state.marketPrices||{}).length;if(!Object.keys(v.incoming).length)throw Error('Keine zuordenbaren Kartenpreise gefunden');if(previous>=20&&Object.keys(v.incoming).length<previous*0.75)throw Error('Preisfeed enthält deutlich weniger Karten als bisher – alter Preisstand bleibt erhalten');state.marketPrices=v.incoming;state.marketPriceUpdated=v.date||new Date().toISOString().slice(0,10);state.marketPriceStats={...v.stats,note:`${Object.keys(v.incoming).length} Varianten zugeordnet · ${v.unknown.length} IDs nicht im Katalog. Vorher ${previous} Preise.`};save();render();notify(`${Object.keys(v.incoming).length} Marktpreise gespeichert`);return v}
+function ingestPrices(feed){const v=normalizePriceFeed(feed),previous=Object.keys(state.marketPrices||{}).length;if(!Object.keys(v.incoming).length)throw Error('Keine zuordenbaren Kartenpreise gefunden');if(previous>=20&&Object.keys(v.incoming).length<previous*0.75)throw Error('Preisfeed enthält deutlich weniger Karten als bisher – alter Preisstand bleibt erhalten');state.marketPrices={...state.marketPrices,...v.incoming};state.marketPriceUpdated=v.date||new Date().toISOString().slice(0,10);state.marketPriceStats={...v.stats,note:`${Object.keys(v.incoming).length} Varianten zugeordnet · ${v.unknown.length} IDs nicht im Katalog · ${v.conflicts.length} widersprüchliche IDs abgelehnt. Vorher ${previous} Preise.`};save();render();notify(`${Object.keys(v.incoming).length} Marktpreise gespeichert`);return v}
 async function priceImport(data){const v=normalizePriceFeed(data);if(!Object.keys(v.incoming).length)throw Error('Keine passenden Preise gefunden');if(!confirm(`${Object.keys(v.incoming).length} Kartenpreise mit Stand ${v.date||'unbekannt'} importieren? Bisherige Marktpreise werden ersetzt; manuelle Preise und Besitzdaten bleiben.`))return;ingestPrices(data)}
 // If the application is opened on GitHub Pages, its daily generated prices.json
 // is available on the same HTTPS origin. No manual URL or CORS proxy is needed.
