@@ -97,7 +97,7 @@ def run():
             key=card["id"]
             if key in ids:
                 statuses["already_known"]+=1;continue
-            v="NORMAL" if card["variant"] in ("NORMAL","BASE") else ("ALT-"+str(card["variant"]).split("-")[-1] if "ALT" in card["variant"] else str(card["variant"]).upper())
+            v="ALT-"+key.rsplit("#ALT-",1)[-1] if "#ALT-" in key else ("NORMAL" if card["variant"] in ("NORMAL","BASE") else str(card["variant"]).upper())
             # App uses ALT-1 and ALT-2; stop if a nonstandard variant is encountered.
             if v not in ("NORMAL","ALT-1","ALT-2"):
                 statuses["unmatched"]+=1;checks.append({"id":key,"reason":"unknown_printing"});continue
